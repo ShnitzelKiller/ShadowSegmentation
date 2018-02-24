@@ -1,0 +1,6 @@
+glfw-3.2.1/*
+cmake-build-debug/*
+tinyobjloader/*
+.idea/*
+.DS_STORE
+*~
