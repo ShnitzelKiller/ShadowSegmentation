@@ -6,11 +6,14 @@
 #include <tiny_obj_loader.h>
 #include "Scene.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include "../mathdebug.h"
 
 
 glm::mat4 DirectionalLight::GetProjectionMatrix(int xmin, int ymin, int xmax, int ymax) {
     glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
     glm::mat4 proj = glm::ortho(xmin, xmax, ymin, ymax);
+    //printmat4(view);
+    printmat4(proj);
     float shearX = dir.x/dir.z;
     float shearY = dir.y/dir.z;
     glm::mat4 shear(1, 0, -shearX, 0, 0, 1, -shearY, 0, 0, 0, 1, 0, 0, 0, 0, 1);

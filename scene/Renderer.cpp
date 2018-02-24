@@ -118,6 +118,7 @@ void Renderer::Render() {
             MW = scale(it->Scale) * MW;
             MW = translate(it->Translation) * MW;
             glm::mat4 MVP = VP * MW;
+
             glUniformMatrix4fv(mvp_uniform, 1, GL_FALSE, &MVP[0][0]);
             glBindVertexArray(m.MeshVAO);
             glDrawElements(GL_TRIANGLES, m.IndexCount, GL_UNSIGNED_INT, (void*) 0);
