@@ -6,14 +6,13 @@
 #include <tiny_obj_loader.h>
 #include "Scene.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
 #include "../mathdebug.h"
 
 
-glm::mat4 DirectionalLight::GetProjectionMatrix(int xmin, int ymin, int xmax, int ymax) {
+glm::mat4 DirectionalLight::GetProjectionMatrix(float xmin, float ymin, float xmax, float ymax) {
     glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
     glm::mat4 proj = glm::ortho(xmin, xmax, ymin, ymax);
-    //printmat4(view);
-    printmat4(proj);
     float shearX = dir.x/dir.z;
     float shearY = dir.y/dir.z;
     glm::mat4 shear(1, 0, -shearX, 0, 0, 1, -shearY, 0, 0, 0, 1, 0, 0, 0, 0, 1);
@@ -21,25 +20,18 @@ glm::mat4 DirectionalLight::GetProjectionMatrix(int xmin, int ymin, int xmax, in
 }
 
 
-Scene::Scene(int xmin, int ymin, int xmax, int ymax) : xmin(xmin), ymin(ymin), xmax(xmax), ymax(ymax) {
+Scene::Scene(float xmin, float ymin, float xmax, float ymax) : xmin(xmin), ymin(ymin), xmax(xmax), ymax(ymax) {
     meshes = std::vector<Mesh>();
     instances = std::vector<Instance>();
     cameras = std::vector<Camera>();
     materials = std::vector<Material>();
 }
 
-void Scene::AddInstance(size_t meshID, size_t *newInstanceID) {
-    Instance inst;
-    inst.meshID = meshID;
-    inst.Scale = glm::vec3(1,1,1);
-    inst.RotationOrigin = glm::vec3(0,0,0);
-    inst.Rotation = glm::angleAxis(0.f, glm::vec3(0.f, 1.f, 0.f));
-    inst.Translation = glm::vec3(0,0,0);
-    instances.push_back(inst);
-    *newInstanceID = instances.size() - 1;
+size_t Scene::AddInstance(size_t meshID) {
+    return AddInstance(meshID, glm::vec3(1,1,1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(0.f, 1.f, 0.f)), glm::vec3(0,0,0));
 }
 
-void Scene::AddInstance(size_t meshID, glm::vec3 scale, glm::vec3 rotationOrigin, glm::quat rotation, glm::vec3 translation, size_t *newInstanceID) {
+size_t Scene::AddInstance(size_t meshID, glm::vec3 scale, glm::vec3 rotationOrigin, glm::quat rotation, glm::vec3 translation) {
     Instance inst;
     inst.meshID = meshID;
     inst.Scale = scale;
@@ -47,7 +39,7 @@ void Scene::AddInstance(size_t meshID, glm::vec3 scale, glm::vec3 rotationOrigin
     inst.Rotation = rotation;
     inst.Translation = translation;
     instances.push_back(inst);
-    *newInstanceID = instances.size() - 1;
+    return instances.size() - 1;
 }
 
 void Scene::AddDirectionalLight(glm::vec3 dir) {
@@ -56,14 +48,75 @@ void Scene::AddDirectionalLight(glm::vec3 dir) {
     lights.push_back(light);
 }
 
-void Scene::LoadMesh(const std::string &filename) {
+size_t Scene::AddTri(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3) {
+    float pos[] = {x1, y1, z1,
+                   x2, y2, z2,
+                   x3, y3, z3};
+    float tex[] = {0, 0,
+                   1, 0,
+                   0, 1};
+
+    glm::vec3 d1(x2-x1, y2-y1, z2-z1);
+    glm::vec3 d2(x3-x1, y3-y1, z3-z1);
+    glm::vec3 n = glm::cross(d1, d2);
+
+    GLuint ind[] = {
+            0, 1, 2,
+            2, 1, 0
+    };
+    GLuint positionVBO = 0;
+    GLuint indicesEBO = 0;
+    GLuint texcoordVBO = 0;
+    GLuint normalVBO = 0;
+    GLuint vao = 0;
+
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    glGenBuffers(1, &positionVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, positionVBO);
+    glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), pos, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glGenBuffers(1, &texcoordVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, texcoordVBO);
+    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), tex, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glGenBuffers(1, &normalVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, normalVBO);
+    glBufferData(GL_ARRAY_BUFFER, 3 * sizeof(float), &n[0], GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glGenBuffers(1, &indicesEBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), ind, GL_STATIC_DRAW);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    Mesh mesh;
+    mesh.name = "tri";
+    mesh.MeshVAO = vao;
+    mesh.PositionBO = positionVBO;
+    mesh.TexCoordBO = texcoordVBO;
+    mesh.NormalBO = normalVBO;
+    mesh.IndexBO = indicesEBO;
+    mesh.VertexCount = (GLuint) 3;
+    mesh.IndexCount = (GLuint) 6;
+    meshes.push_back(mesh);
+    return meshes.size() - 1;
+}
+
+
+size_t Scene::LoadMesh(const std::string &filename) {
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
     tinyobj::attrib_t attrib;
     std::string err;
     if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &err, filename.c_str())) {
         fprintf(stderr, "failed to load %s", filename.c_str());
-        return;
+        return -1;
     }
     GLuint positionVBO = 0;
     GLuint texcoordVBO = 0;
@@ -152,4 +205,5 @@ void Scene::LoadMesh(const std::string &filename) {
     mesh.VertexCount = (GLuint) attrib.vertices.size() / 3;
     mesh.IndexCount = (GLuint) shapes[0].mesh.indices.size();
     meshes.push_back(mesh);
+    return meshes.size() - 1;
 }

@@ -3,35 +3,10 @@
 #include <iostream>
 #include "scene/Scene.h"
 #include "scene/Renderer.h"
+#include "../shaders.h"
 
 #define SCREEN_WIDTH 1024
 #define SCREEN_HEIGHT 768
-
-const char* vertexShader = R"glsl(
-    #version 150 core
-
-    in vec2 pos;
-    in vec2 tex;
-
-    out vec2 T;
-
-    void main() {
-        T = tex;
-        gl_Position = vec4(pos, 0.0, 1.0);
-    }
-)glsl";
-
-const char* fragShader = R"glsl(
-    #version 150 core
-
-    uniform sampler2D image;
-    in vec2 T;
-    out vec4 fragColor;
-
-    void main() {
-        fragColor = texture(image, T);
-    }
-)glsl";
 
 Scene *s;
 Renderer *r;
@@ -53,7 +28,7 @@ int main() {
     GLFWwindow* window; // (In the accompanying source code, this variable is global for simplicity)
     window = glfwCreateWindow( SCREEN_WIDTH, SCREEN_HEIGHT, "Display", NULL, NULL);
     if( window == NULL ){
-        fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
+        fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible.\n" );
         glfwTerminate();
         return -1;
     }
@@ -67,21 +42,29 @@ int main() {
     // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
+    //get framebuffer size
+    int fwidth, fheight;
+    glfwGetFramebufferSize(window, &fwidth, &fheight);
+
+    std::cout << "framebuffer: " << fwidth << " x " << fheight << std::endl;
+
+    //build scene
     s = new Scene(-10, -10, 10, 10);
-    s->LoadMesh("../data/torus.obj");
-    size_t torusID;
-    s->AddInstance(0, &torusID);
+    size_t torusMeshID = s->LoadMesh("../data/torus.obj");
+    size_t triMeshID = s->AddTri(-1, -1, 0, 1, -1, 0, -1, 1, 0);
+    s->AddInstance(torusMeshID);
+    s->AddInstance(triMeshID);
     s->AddDirectionalLight(glm::vec3(0, 0, -1));
     r = new Renderer();
-    r->Init(s, SCREEN_WIDTH, SCREEN_HEIGHT);
+    r->Init(s, fwidth, fheight);
     r->Render();
     size_t n;
     GLuint *textures = r->GetImages(&n);
 
-    //create fullscreen quad
+    //render to fullscreen quad
 
     GLuint vshader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vshader, 1, &vertexShader, nullptr);
+    glShaderSource(vshader, 1, &simpleVertexShader, nullptr);
     glCompileShader(vshader);
     GLint status;
     glGetShaderiv(vshader, GL_COMPILE_STATUS, &status);
@@ -92,7 +75,7 @@ int main() {
         return -1;
     }
     GLuint fshader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fshader, 1, &fragShader, nullptr);
+    glShaderSource(fshader, 1, &simpleFragShader, nullptr);
     glCompileShader(fshader);
     glGetShaderiv(fshader, GL_COMPILE_STATUS, &status);
     if (status != GL_TRUE) {
@@ -139,6 +122,7 @@ int main() {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textures[0]);
     glUniform1i(texUniform, 0);
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -166,7 +150,7 @@ int main() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     glClearColor(0, 0, 0, 0);
-//    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    glViewport(0, 0, fwidth, fheight);
 
     do{
         // TODO: Draw the stuff

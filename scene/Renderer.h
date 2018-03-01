@@ -20,6 +20,7 @@ private:
     GLuint *images;
     GLuint shaderProgram;
     GLint mvp_uniform;
+    GLint nmw_uniform;
     int width;
     int height;
     int num_buffers;

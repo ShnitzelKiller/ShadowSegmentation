@@ -9,4 +9,7 @@
 
 void printmat4(glm::mat4 &VP);
 
+void printmat3(glm::mat3 &VP);
+
+
 #endif //RENDERER_MATHDEBUG_H

@@ -47,12 +47,12 @@ struct Camera
 };
 
 struct Light {
-    virtual glm::mat4 GetProjectionMatrix(int xmin, int ymin, int xmax, int ymax) = 0;
+    virtual glm::mat4 GetProjectionMatrix(float xmin, float ymin, float xmax, float ymax) = 0;
     virtual ~Light() = default;
 };
 
 struct DirectionalLight : Light {
-    glm::mat4 GetProjectionMatrix(int xmin, int ymin, int xmax, int ymax) override;
+    glm::mat4 GetProjectionMatrix(float xmin, float ymin, float xmax, float ymax) override;
     glm::vec3 dir;
 };
 
@@ -67,22 +67,23 @@ struct Instance {
 
 class Scene {
 public:
-    Scene(int xmin, int ymin, int xmax, int ymax);
+    Scene(float xmin, float ymin, float xmax, float ymax);
     std::vector<Mesh> meshes;
     std::vector<Instance> instances;
     std::vector<Camera> cameras;
     std::vector<Light*> lights;
     std::vector<Material> materials;
-    int xmin, ymin, xmax, ymax;
+    float xmin, ymin, xmax, ymax;
     /**
      * Add an instance of the specified mesh, returning the instance ID in newInstanceID
      */
-    void AddInstance(size_t meshID, size_t *newInstanceID);
-    void AddInstance(size_t meshID, glm::vec3 scale, glm::vec3 rotationOrigin, glm::quat rotation, glm::vec3 translation, size_t *newInstanceID);
+    size_t AddInstance(size_t meshID);
+    size_t AddInstance(size_t meshID, glm::vec3 scale, glm::vec3 rotationOrigin, glm::quat rotation, glm::vec3 translation);
 
     void AddDirectionalLight(glm::vec3 dir);
 
-    void LoadMesh(const std::string &filename);
+    size_t LoadMesh(const std::string &filename);
+    size_t AddTri(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3);
 
     ~Scene() {
         for (auto it=lights.begin(); it != lights.end(); it++) {
