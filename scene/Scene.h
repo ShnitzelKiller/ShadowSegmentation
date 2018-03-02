@@ -81,17 +81,12 @@ public:
     size_t AddInstance(size_t meshID, glm::vec3 scale, glm::vec3 rotationOrigin, glm::quat rotation, glm::vec3 translation);
 
     void AddDirectionalLight(glm::vec3 dir);
+    glm::mat4 GetProjectionMatrix(size_t i);
 
     size_t LoadMesh(const std::string &filename);
     size_t AddTri(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3);
 
-    void Destroy();
-
-    ~Scene() {
-        for (auto it=lights.begin(); it != lights.end(); it++) {
-            delete *it;
-        }
-    }
+    ~Scene();
 };
 
 #endif //RENDERER_SCENE_H

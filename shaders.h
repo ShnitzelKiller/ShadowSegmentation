@@ -16,12 +16,12 @@ extern const char* simpleFragShader;
 
 class Program {
 public:
-    void CreateFromShaders(const char* vert, const char* frag);
-    void Destroy();
+    Program(const char* vert, const char* frag);
     void Use();
     void Unuse();
     GLint GetAttributeLocation(const char* name);
     GLint GetUniformLocation(const char* name);
+    ~Program();
 private:
     GLuint program_;
     GLuint vshader_;

@@ -12,6 +12,7 @@
 
 Scene *s;
 Renderer *r;
+Program *program;
 
 
 int main() {
@@ -57,21 +58,19 @@ int main() {
     s->AddInstance(torusMeshID, glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(0.f, 1.f, 0.f)), glm::vec3(0,0,0));
     s->AddInstance(triMeshID);
     s->AddDirectionalLight(glm::vec3(0, 0, -1));
-    r = new Renderer();
-    r->Init(s, fwidth, fheight);
+    r = new Renderer(s, fwidth, fheight);
     r->Render();
     size_t n;
     GLuint *textures = r->GetImages(&n);
 
     //render to fullscreen quad
 
-    Program program;
-    program.CreateFromShaders(simpleVertexShader, simpleFragShader);
-    program.Use();
+    program = new Program(simpleVertexShader, simpleFragShader);
+    program->Use();
 
-    GLint posAttrib = program.GetAttributeLocation("pos");
-    GLint texAttrib = program.GetAttributeLocation("tex");
-    GLint texUniform = program.GetUniformLocation("image");
+    GLint posAttrib = program->GetAttributeLocation("pos");
+    GLint texAttrib = program->GetAttributeLocation("tex");
+    GLint texUniform = program->GetUniformLocation("image");
 
     const float verts[] = {-1, 1,
                             1, 1,
@@ -150,12 +149,9 @@ int main() {
     glDeleteBuffers(1, &tbo);
     glDeleteBuffers(1, &ebo);
     glDeleteVertexArrays(1, &vao);
-    program.Unuse();
-    program.Destroy();
-
-    s->Destroy();
+    program->Unuse();
+    delete program;
     delete s;
-    r->Destroy();
     delete r;
 
     GLuint err;

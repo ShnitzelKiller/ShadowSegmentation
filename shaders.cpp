@@ -64,7 +64,7 @@ const char* simpleFragShader = R"glsl(
     }
 )glsl";
 
-void Program::CreateFromShaders(const char *vert, const char *frag) {
+Program::Program(const char *vert, const char *frag) {
 
     GLuint newvert = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(newvert, 1, &vert, nullptr);
@@ -98,21 +98,15 @@ void Program::CreateFromShaders(const char *vert, const char *frag) {
         return;
     }
 
-    if (program_ != 0) {
-        Destroy();
-    }
     program_ = newprogram;
     vshader_ = newvert;
     fshader_ = newfrag;
 }
 
-void Program::Destroy() {
+Program::~Program() {
     glDeleteProgram(program_);
     glDeleteShader(vshader_);
     glDeleteShader(fshader_);
-    program_ = 0;
-    vshader_ = 0;
-    fshader_ = 0;
 }
 
 void Program::Use() {

@@ -10,7 +10,7 @@
 
 
 
-void Renderer::Init(Scene *scene, int width, int height) {
+Renderer::Renderer(Scene *scene, int width, int height) {
 
     this->width = width;
     this->height = height;
@@ -21,11 +21,10 @@ void Renderer::Init(Scene *scene, int width, int height) {
     glGenTextures(num_buffers, images);
 
     framebuffers = new GLuint[num_buffers];
-    glGenFramebuffers((int) num_buffers, framebuffers);
+    glGenFramebuffers(num_buffers, framebuffers);
 
     //create shaders
-    program = new Program();
-    program->CreateFromShaders(vertexSource, fragSource);
+    program = new Program(vertexSource, fragSource);
 
     mvp_uniform = program->GetUniformLocation("mvp");
     nmw_uniform = program->GetUniformLocation("nmw");
@@ -47,12 +46,12 @@ void Renderer::Init(Scene *scene, int width, int height) {
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
-    glUseProgram(0);
+    program->Unuse();
 }
 
 void Renderer::Render() {
     program->Use();
-    for (int i=0; i<num_buffers; i++) {
+    for (size_t i=0; i<num_buffers; i++) {
 
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[i]);
         GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
@@ -61,7 +60,7 @@ void Renderer::Render() {
         glClearColor(1, 1, 1, 1);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glm::mat4 VP = scene->lights[i]->GetProjectionMatrix(scene->xmin, scene->ymin, scene->xmax, scene->ymax);
+        glm::mat4 VP = scene->GetProjectionMatrix(i);
 
         for (auto it = scene->instances.begin(); it != scene->instances.end(); it++) {
             Mesh m = scene->meshes[it->meshID];
@@ -93,10 +92,9 @@ void Renderer::Render() {
     program->Unuse();
 }
 
-void Renderer::Destroy() {
+Renderer::~Renderer() {
     glDeleteTextures(num_buffers, images);
     glDeleteFramebuffers(num_buffers, framebuffers);
-    program->Destroy();
     delete program;
     program = nullptr;
     delete images;

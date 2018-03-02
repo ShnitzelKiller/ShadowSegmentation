@@ -11,9 +11,9 @@
 
 class Renderer {
 public:
-    void Init(Scene *scene, int width, int height);
+    Renderer(Scene *scene, int width, int height);
     void Render();
-    void Destroy();
+    ~Renderer();
     GLuint *GetImages(size_t *length);
 private:
     Scene *scene;

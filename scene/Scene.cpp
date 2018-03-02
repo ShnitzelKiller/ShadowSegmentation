@@ -211,7 +211,10 @@ size_t Scene::LoadMesh(const std::string &filename) {
     return meshes.size() - 1;
 }
 
-void Scene::Destroy() {
+Scene::~Scene() {
+    for (auto it=lights.begin(); it != lights.end(); it++) {
+        delete *it;
+    }
     for (Mesh m : meshes) {
         glDeleteVertexArrays(1, &m.MeshVAO);
         glDeleteBuffers(1, &m.IndexBO);
@@ -219,4 +222,8 @@ void Scene::Destroy() {
         glDeleteBuffers(1, &m.TexCoordBO);
         glDeleteBuffers(1, &m.PositionBO);
     }
+}
+
+glm::mat4 Scene::GetProjectionMatrix(size_t i) {
+    return lights[i]->GetProjectionMatrix(xmin, ymin, xmax, ymax);
 }
