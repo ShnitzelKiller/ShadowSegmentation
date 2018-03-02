@@ -24,45 +24,19 @@ void Renderer::Init(Scene *scene, int width, int height) {
     glGenFramebuffers((int) num_buffers, framebuffers);
 
     //create shaders
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexSource, nullptr);
-    glCompileShader(vertexShader);
-    GLint status;
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE) {
-        char buffer[512];
-        glGetShaderInfoLog(vertexShader, 512, nullptr, buffer);
-        std::cerr << "vertex shader compilation failed: " << std::string(buffer) << std::endl;
-    }
+    program = new Program();
+    program->CreateFromShaders(vertexSource, fragSource);
 
-    GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragShader, 1, &fragSource, nullptr);
-    glCompileShader(fragShader);
-    glGetShaderiv(fragShader, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE) {
-        char buffer[512];
-        glGetShaderInfoLog(fragShader, 512, nullptr, buffer);
-        std::cerr << "frag shader compilation failed: " << std::string(buffer) << std::endl;
-    }
-
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragShader);
-    glLinkProgram(shaderProgram);
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &status);
-    if (status != GL_TRUE) {
-        std::cerr << "linking failed" << std::endl;
-    }
-
-
-    mvp_uniform = glGetUniformLocation(shaderProgram, "mvp");
-    nmw_uniform = glGetUniformLocation(shaderProgram, "nmw");
+    mvp_uniform = program->GetUniformLocation("mvp");
+    nmw_uniform = program->GetUniformLocation("nmw");
 
 
     //create framebuffers
     for (int i=0; i<num_buffers; i++) {
         glBindTexture(GL_TEXTURE_2D, images[i]);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_BYTE, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glBindTexture(GL_TEXTURE_2D, 0);
 
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[i]);
@@ -77,8 +51,7 @@ void Renderer::Init(Scene *scene, int width, int height) {
 }
 
 void Renderer::Render() {
-    glUseProgram(shaderProgram);
-
+    program->Use();
     for (int i=0; i<num_buffers; i++) {
 
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[i]);
@@ -87,18 +60,20 @@ void Renderer::Render() {
         glViewport(0, 0, width, height);
         glClearColor(1, 1, 1, 1);
         glClear(GL_COLOR_BUFFER_BIT);
+
         glm::mat4 VP = scene->lights[i]->GetProjectionMatrix(scene->xmin, scene->ymin, scene->xmax, scene->ymax);
 
         for (auto it = scene->instances.begin(); it != scene->instances.end(); it++) {
             Mesh m = scene->meshes[it->meshID];
             std::cout << "drawing instance " << m.name << " (" << m.IndexCount << " indices)" << std::endl;
             glm::mat4 MW;
+            /*
             MW = translate(-it->RotationOrigin) * MW;
             MW = mat4_cast(it->Rotation) * MW;
             MW = translate(it->RotationOrigin) * MW;
             MW = scale(it->Scale) * MW;
             MW = translate(it->Translation) * MW;
-//            glm::mat4 MVP = VP * MW;
+            glm::mat4 MVP = VP * MW; */
             glm::mat4 MVP;
             glm::mat3 NMW;
             NMW = glm::mat3_cast(it->Rotation) * NMW;
@@ -115,13 +90,15 @@ void Renderer::Render() {
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
-    glUseProgram(0);
+    program->Unuse();
 }
 
 void Renderer::Destroy() {
     glDeleteTextures(num_buffers, images);
     glDeleteFramebuffers(num_buffers, framebuffers);
-    glDeleteProgram(shaderProgram);
+    program->Destroy();
+    delete program;
+    program = nullptr;
     delete images;
     delete framebuffers;
 }

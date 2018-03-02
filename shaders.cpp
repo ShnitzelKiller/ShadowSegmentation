@@ -3,6 +3,7 @@
 //
 
 #include "shaders.h"
+#include <iostream>
 
 const char* fragSource = R"glsl(
     #version 150 core
@@ -59,6 +60,73 @@ const char* simpleFragShader = R"glsl(
     out vec4 fragColor;
 
     void main() {
-        fragColor = texture(image, T);
+        fragColor = texture(image, T) + vec4(0, T * 0.5f, 0);
     }
 )glsl";
+
+void Program::CreateFromShaders(const char *vert, const char *frag) {
+
+    GLuint newvert = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(newvert, 1, &vert, nullptr);
+    glCompileShader(newvert);
+    GLint status;
+    glGetShaderiv(newvert, GL_COMPILE_STATUS, &status);
+    if (status != GL_TRUE) {
+        char buffer[512];
+        glGetShaderInfoLog(newvert, 512, nullptr, buffer);
+        std::cerr << "vertex shader compilation failed: " << std::string(buffer) << std::endl;
+        return;
+    }
+
+    GLuint newfrag = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(newfrag, 1, &frag, nullptr);
+    glCompileShader(newfrag);
+    glGetShaderiv(newfrag, GL_COMPILE_STATUS, &status);
+    if (status != GL_TRUE) {
+        char buffer[512];
+        glGetShaderInfoLog(newfrag, 512, nullptr, buffer);
+        return;
+    }
+
+    GLuint newprogram = glCreateProgram();
+    glAttachShader(newprogram, newvert);
+    glAttachShader(newprogram, newfrag);
+    glLinkProgram(newprogram);
+    glGetProgramiv(newprogram, GL_LINK_STATUS, &status);
+    if (status != GL_TRUE) {
+        std::cerr << "linking failed" << std::endl;
+        return;
+    }
+
+    if (program_ != 0) {
+        Destroy();
+    }
+    program_ = newprogram;
+    vshader_ = newvert;
+    fshader_ = newfrag;
+}
+
+void Program::Destroy() {
+    glDeleteProgram(program_);
+    glDeleteShader(vshader_);
+    glDeleteShader(fshader_);
+    program_ = 0;
+    vshader_ = 0;
+    fshader_ = 0;
+}
+
+void Program::Use() {
+    glUseProgram(program_);
+}
+
+void Program::Unuse() {
+    glUseProgram(0);
+}
+
+GLint Program::GetAttributeLocation(const char *name) {
+    return glGetAttribLocation(program_, name);
+}
+
+GLint Program::GetUniformLocation(const char *name) {
+    return glGetUniformLocation(program_, name);
+}

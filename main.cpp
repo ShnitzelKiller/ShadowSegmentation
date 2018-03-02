@@ -4,6 +4,8 @@
 #include "scene/Scene.h"
 #include "scene/Renderer.h"
 #include "../shaders.h"
+#include <chrono>
+#include <thread>
 
 #define SCREEN_WIDTH 1024
 #define SCREEN_HEIGHT 768
@@ -51,8 +53,8 @@ int main() {
     //build scene
     s = new Scene(-10, -10, 10, 10);
     size_t torusMeshID = s->LoadMesh("../data/torus.obj");
-    size_t triMeshID = s->AddTri(-1, -1, 0, 1, -1, 0, -1, 1, 0);
-    s->AddInstance(torusMeshID);
+    size_t triMeshID = s->AddTri(-1.1f, -1.1f, 0.5f, 1.1f, -1.1f, 0.5f, -1.1f, 1.1f, 0.5f);
+    s->AddInstance(torusMeshID, glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(0.f, 1.f, 0.f)), glm::vec3(0,0,0));
     s->AddInstance(triMeshID);
     s->AddDirectionalLight(glm::vec3(0, 0, -1));
     r = new Renderer();
@@ -63,36 +65,13 @@ int main() {
 
     //render to fullscreen quad
 
-    GLuint vshader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vshader, 1, &simpleVertexShader, nullptr);
-    glCompileShader(vshader);
-    GLint status;
-    glGetShaderiv(vshader, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE) {
-        char buffer[512];
-        glGetShaderInfoLog(vshader, 512, nullptr, buffer);
-        std::cerr << std::string(buffer) << std::endl;
-        return -1;
-    }
-    GLuint fshader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fshader, 1, &simpleFragShader, nullptr);
-    glCompileShader(fshader);
-    glGetShaderiv(fshader, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE) {
-        char buffer[512];
-        glGetShaderInfoLog(fshader, 512, nullptr, buffer);
-        std::cerr << std::string(buffer) << std::endl;
-        return -1;
-    }
-    GLuint program = glCreateProgram();
-    glAttachShader(program, fshader);
-    glAttachShader(program, vshader);
-    glLinkProgram(program);
-    glUseProgram(program);
+    Program program;
+    program.CreateFromShaders(simpleVertexShader, simpleFragShader);
+    program.Use();
 
-    GLint posAttrib = glGetAttribLocation(program, "pos");
-    GLint texAttrib = glGetAttribLocation(program, "tex");
-    GLint texUniform = glGetUniformLocation(program, "image");
+    GLint posAttrib = program.GetAttributeLocation("pos");
+    GLint texAttrib = program.GetAttributeLocation("tex");
+    GLint texUniform = program.GetUniformLocation("image");
 
     const float verts[] = {-1, 1,
                             1, 1,
@@ -111,20 +90,22 @@ int main() {
             3, 0, 2
     };
 
+    glActiveTexture(GL_TEXTURE0);
+
     //debug texture
     /*float pixels[] = {
-            0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f
+            0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+            1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f
     };
     GLuint test_tex;
-    glGenTextures(1, &test_tex); */
+    glGenTextures(1, &test_tex);
+    glBindTexture(GL_TEXTURE_2D, test_tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 3, 2, 0, GL_RGB, GL_FLOAT, pixels);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);*/
 
-    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textures[0]);
     glUniform1i(texUniform, 0);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     GLuint vao;
     glGenVertexArrays(1, &vao);
@@ -153,15 +134,14 @@ int main() {
     glViewport(0, 0, fwidth, fheight);
 
     do{
-        // TODO: Draw the stuff
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // Swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
-
+        std::this_thread::sleep_for(std::chrono::milliseconds(34));
     } // Check if the ESC key was pressed or the window was closed
     while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
            glfwWindowShouldClose(window) == 0 );
@@ -170,13 +150,18 @@ int main() {
     glDeleteBuffers(1, &tbo);
     glDeleteBuffers(1, &ebo);
     glDeleteVertexArrays(1, &vao);
-    glDeleteProgram(program);
-    glDeleteShader(vshader);
-    glDeleteShader(fshader);
+    program.Unuse();
+    program.Destroy();
 
+    s->Destroy();
     delete s;
     r->Destroy();
     delete r;
+
+    GLuint err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        fprintf(stderr, "error %x", err);
+    }
 
     return 0;
 }

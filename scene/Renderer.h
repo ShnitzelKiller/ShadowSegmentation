@@ -7,6 +7,7 @@
 
 
 #include "Scene.h"
+#include "../shaders.h"
 
 class Renderer {
 public:
@@ -18,7 +19,7 @@ private:
     Scene *scene;
     GLuint *framebuffers;
     GLuint *images;
-    GLuint shaderProgram;
+    Program *program;
     GLint mvp_uniform;
     GLint nmw_uniform;
     int width;

@@ -77,16 +77,19 @@ size_t Scene::AddTri(float x1, float y1, float z1, float x2, float y2, float z2,
     glBindBuffer(GL_ARRAY_BUFFER, positionVBO);
     glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), pos, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
 
     glGenBuffers(1, &texcoordVBO);
     glBindBuffer(GL_ARRAY_BUFFER, texcoordVBO);
     glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), tex, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(1);
 
     glGenBuffers(1, &normalVBO);
     glBindBuffer(GL_ARRAY_BUFFER, normalVBO);
     glBufferData(GL_ARRAY_BUFFER, 3 * sizeof(float), &n[0], GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(2);
 
     glGenBuffers(1, &indicesEBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesEBO);
@@ -116,7 +119,7 @@ size_t Scene::LoadMesh(const std::string &filename) {
     std::string err;
     if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &err, filename.c_str())) {
         fprintf(stderr, "failed to load %s", filename.c_str());
-        return -1;
+        return 0;
     }
     GLuint positionVBO = 0;
     GLuint texcoordVBO = 0;
@@ -206,4 +209,14 @@ size_t Scene::LoadMesh(const std::string &filename) {
     mesh.IndexCount = (GLuint) shapes[0].mesh.indices.size();
     meshes.push_back(mesh);
     return meshes.size() - 1;
+}
+
+void Scene::Destroy() {
+    for (Mesh m : meshes) {
+        glDeleteVertexArrays(1, &m.MeshVAO);
+        glDeleteBuffers(1, &m.IndexBO);
+        glDeleteBuffers(1, &m.NormalBO);
+        glDeleteBuffers(1, &m.TexCoordBO);
+        glDeleteBuffers(1, &m.PositionBO);
+    }
 }

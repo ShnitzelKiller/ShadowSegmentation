@@ -85,16 +85,11 @@ public:
     size_t LoadMesh(const std::string &filename);
     size_t AddTri(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3);
 
+    void Destroy();
+
     ~Scene() {
         for (auto it=lights.begin(); it != lights.end(); it++) {
             delete *it;
-        }
-        for (Mesh m : meshes) {
-            glDeleteVertexArrays(1, &m.MeshVAO);
-            glDeleteBuffers(1, &m.IndexBO);
-            glDeleteBuffers(1, &m.NormalBO);
-            glDeleteBuffers(1, &m.TexCoordBO);
-            glDeleteBuffers(1, &m.PositionBO);
         }
     }
 };
