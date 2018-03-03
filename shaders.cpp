@@ -91,16 +91,20 @@ Program::Program(const char *vert, const char *frag) {
     GLuint newprogram = glCreateProgram();
     glAttachShader(newprogram, newvert);
     glAttachShader(newprogram, newfrag);
-    glLinkProgram(newprogram);
-    glGetProgramiv(newprogram, GL_LINK_STATUS, &status);
-    if (status != GL_TRUE) {
-        std::cerr << "linking failed" << std::endl;
-        return;
-    }
 
     program_ = newprogram;
     vshader_ = newvert;
     fshader_ = newfrag;
+}
+
+void Program::Link() {
+    GLint status;
+    glLinkProgram(program_);
+    glGetProgramiv(program_, GL_LINK_STATUS, &status);
+    if (status != GL_TRUE) {
+        std::cerr << "linking failed" << std::endl;
+        return;
+    }
 }
 
 Program::~Program() {
@@ -123,4 +127,8 @@ GLint Program::GetAttributeLocation(const char *name) {
 
 GLint Program::GetUniformLocation(const char *name) {
     return glGetUniformLocation(program_, name);
+}
+
+void Program::BindAttribLocation(GLuint index, const char *name) {
+    glBindAttribLocation(program_, index, name);
 }

@@ -25,6 +25,10 @@ Renderer::Renderer(Scene *scene, int width, int height) {
 
     //create shaders
     program = new Program(vertexSource, fragSource);
+    program->BindAttribLocation(0, "position");
+    program->BindAttribLocation(1, "texCoord");
+    program->BindAttribLocation(2, "normal");
+    program->Link();
 
     mvp_uniform = program->GetUniformLocation("mvp");
     nmw_uniform = program->GetUniformLocation("nmw");

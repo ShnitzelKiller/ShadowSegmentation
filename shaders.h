@@ -17,10 +17,12 @@ extern const char* simpleFragShader;
 class Program {
 public:
     Program(const char* vert, const char* frag);
+    void Link();
     void Use();
     void Unuse();
     GLint GetAttributeLocation(const char* name);
     GLint GetUniformLocation(const char* name);
+    void BindAttribLocation(GLuint index, const char* name);
     ~Program();
 private:
     GLuint program_;

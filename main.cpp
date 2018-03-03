@@ -66,10 +66,14 @@ int main() {
     //render to fullscreen quad
 
     program = new Program(simpleVertexShader, simpleFragShader);
+    program->BindAttribLocation(0, "pos");
+    program->BindAttribLocation(1, "tex");
+    program->Link();
     program->Use();
 
-    GLint posAttrib = program->GetAttributeLocation("pos");
-    GLint texAttrib = program->GetAttributeLocation("tex");
+    /*GLint posAttrib = program->GetAttributeLocation("pos");
+    GLint texAttrib = program->GetAttributeLocation("tex");*/
+
     GLint texUniform = program->GetUniformLocation("image");
 
     const float verts[] = {-1, 1,
@@ -114,15 +118,15 @@ int main() {
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(posAttrib);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
 
     GLuint tbo;
     glGenBuffers(1, &tbo);
     glBindBuffer(GL_ARRAY_BUFFER, tbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(texCoords), texCoords, GL_STATIC_DRAW);
-    glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(texAttrib);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(1);
 
     GLuint ebo;
     glGenBuffers(1, &ebo);
