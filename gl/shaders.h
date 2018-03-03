@@ -16,7 +16,10 @@ extern const char* simpleFragShader;
 
 class Program {
 public:
-    Program(const char* vert, const char* frag);
+    Program();
+    void AttachVertexShader(const char* vshader);
+    void AttachFragmentShader(const char* fshader);
+    void AttachShaders(const char* vshader, const char* fshader);
     void Link();
     void Use();
     void Unuse();
@@ -25,6 +28,7 @@ public:
     void BindAttribLocation(GLuint index, const char* name);
     ~Program();
 private:
+    void DeleteShaders();
     GLuint program_;
     GLuint vshader_;
     GLuint fshader_;

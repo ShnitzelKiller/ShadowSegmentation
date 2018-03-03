@@ -7,7 +7,7 @@
 
 
 #include "Scene.h"
-#include "../shaders.h"
+#include "../gl/shaders.h"
 
 class Renderer {
 public:

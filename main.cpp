@@ -3,7 +3,7 @@
 #include <iostream>
 #include "scene/Scene.h"
 #include "scene/Renderer.h"
-#include "../shaders.h"
+#include "gl/shaders.h"
 #include <chrono>
 #include <thread>
 
@@ -52,10 +52,10 @@ int main() {
     std::cout << "framebuffer: " << fwidth << " x " << fheight << std::endl;
 
     //build scene
-    s = new Scene(-10, -10, 10, 10);
+    s = new Scene(-2, -2, 2, 2);
     size_t torusMeshID = s->LoadMesh("../data/torus.obj");
-    size_t triMeshID = s->AddTri(-1.1f, -1.1f, 0.5f, 1.1f, -1.1f, 0.5f, -1.1f, 1.1f, 0.5f);
-    s->AddInstance(torusMeshID, glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(0.f, 1.f, 0.f)), glm::vec3(0,0,0));
+    size_t triMeshID = s->AddTri(-1, -1, 0, 0, 0.2f, 0, 0, 1, 0);
+    s->AddInstance(torusMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(0.f, 1.f, 0.f)), glm::vec3(0,0,0));
     s->AddInstance(triMeshID);
     s->AddDirectionalLight(glm::vec3(0, 0, -1));
     r = new Renderer(s, fwidth, fheight);
@@ -65,9 +65,8 @@ int main() {
 
     //render to fullscreen quad
 
-    program = new Program(simpleVertexShader, simpleFragShader);
-    program->BindAttribLocation(0, "pos");
-    program->BindAttribLocation(1, "tex");
+    program = new Program();
+    program->AttachShaders(simpleVertexShader, simpleFragShader);
     program->Link();
     program->Use();
 

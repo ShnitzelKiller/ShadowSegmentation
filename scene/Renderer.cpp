@@ -6,7 +6,7 @@
 #include "Renderer.h"
 #include <glm/gtx/transform.hpp>
 #include "../mathdebug.h"
-#include "../shaders.h"
+#include "../gl/shaders.h"
 
 
 
@@ -24,10 +24,8 @@ Renderer::Renderer(Scene *scene, int width, int height) {
     glGenFramebuffers(num_buffers, framebuffers);
 
     //create shaders
-    program = new Program(vertexSource, fragSource);
-    program->BindAttribLocation(0, "position");
-    program->BindAttribLocation(1, "texCoord");
-    program->BindAttribLocation(2, "normal");
+    program = new Program();
+    program->AttachShaders(vertexSource, fragSource);
     program->Link();
 
     mvp_uniform = program->GetUniformLocation("mvp");
@@ -70,14 +68,13 @@ void Renderer::Render() {
             Mesh m = scene->meshes[it->meshID];
             std::cout << "drawing instance " << m.name << " (" << m.IndexCount << " indices)" << std::endl;
             glm::mat4 MW;
-            /*
+
             MW = translate(-it->RotationOrigin) * MW;
             MW = mat4_cast(it->Rotation) * MW;
             MW = translate(it->RotationOrigin) * MW;
             MW = scale(it->Scale) * MW;
             MW = translate(it->Translation) * MW;
-            glm::mat4 MVP = VP * MW; */
-            glm::mat4 MVP;
+            glm::mat4 MVP = VP * MW;
             glm::mat3 NMW;
             NMW = glm::mat3_cast(it->Rotation) * NMW;
             NMW = glm::mat3(scale(1.0f/(it->Scale))) * NMW;

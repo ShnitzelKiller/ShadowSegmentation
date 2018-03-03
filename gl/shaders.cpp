@@ -6,7 +6,7 @@
 #include <iostream>
 
 const char* fragSource = R"glsl(
-    #version 150 core
+    #version 330 core
 
     out vec4 outColor;
     in vec2 T;
@@ -19,14 +19,14 @@ const char* fragSource = R"glsl(
 )glsl";
 
 const char* vertexSource = R"glsl(
-#version 150 core
+#version 330 core
 
 uniform mat4 mvp;
 uniform mat3 nmw;
 
-in vec3 position;
-in vec2 texCoord;
-in vec3 normal;
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec2 texCoord;
+layout(location = 2) in vec3 normal;
 
 out vec2 T;
 out vec3 N;
@@ -39,10 +39,10 @@ void main()
 })glsl";
 
 const char* simpleVertexShader = R"glsl(
-    #version 150 core
+    #version 330 core
 
-    in vec2 pos;
-    in vec2 tex;
+    layout(location = 0) in vec2 pos;
+    layout(location = 1) in vec2 tex;
 
     out vec2 T;
 
@@ -53,7 +53,7 @@ const char* simpleVertexShader = R"glsl(
 )glsl";
 
 const char* simpleFragShader = R"glsl(
-    #version 150 core
+    #version 330 core
 
     uniform sampler2D image;
     in vec2 T;
@@ -64,8 +64,11 @@ const char* simpleFragShader = R"glsl(
     }
 )glsl";
 
-Program::Program(const char *vert, const char *frag) {
+Program::Program() : vshader_(0), fshader_(0) {
+    program_ = glCreateProgram();
+}
 
+void Program::AttachVertexShader(const char *vert) {
     GLuint newvert = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(newvert, 1, &vert, nullptr);
     glCompileShader(newvert);
@@ -77,7 +80,12 @@ Program::Program(const char *vert, const char *frag) {
         std::cerr << "vertex shader compilation failed: " << std::string(buffer) << std::endl;
         return;
     }
+    glAttachShader(program_, newvert);
+    vshader_ = newvert;
+}
 
+void Program::AttachFragmentShader(const char *frag) {
+    GLint status;
     GLuint newfrag = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(newfrag, 1, &frag, nullptr);
     glCompileShader(newfrag);
@@ -85,16 +93,17 @@ Program::Program(const char *vert, const char *frag) {
     if (status != GL_TRUE) {
         char buffer[512];
         glGetShaderInfoLog(newfrag, 512, nullptr, buffer);
+        std::cerr << "fragment shader compilation failed: " << std::string(buffer) << std::endl;
         return;
     }
-
-    GLuint newprogram = glCreateProgram();
-    glAttachShader(newprogram, newvert);
-    glAttachShader(newprogram, newfrag);
-
-    program_ = newprogram;
-    vshader_ = newvert;
+    glAttachShader(program_, newfrag);
     fshader_ = newfrag;
+}
+
+void Program::AttachShaders(const char *vert, const char *frag) {
+
+    AttachVertexShader(vert);
+    AttachFragmentShader(frag);
 }
 
 void Program::Link() {
@@ -105,12 +114,12 @@ void Program::Link() {
         std::cerr << "linking failed" << std::endl;
         return;
     }
+    DeleteShaders();
 }
 
 Program::~Program() {
+    DeleteShaders();
     glDeleteProgram(program_);
-    glDeleteShader(vshader_);
-    glDeleteShader(fshader_);
 }
 
 void Program::Use() {
@@ -132,3 +141,18 @@ GLint Program::GetUniformLocation(const char *name) {
 void Program::BindAttribLocation(GLuint index, const char *name) {
     glBindAttribLocation(program_, index, name);
 }
+
+void Program::DeleteShaders() {
+    if (vshader_ != 0) {
+        glDetachShader(program_, vshader_);
+        glDeleteShader(vshader_);
+        vshader_ = 0;
+    }
+    if (fshader_ != 0) {
+        glDetachShader(program_, fshader_);
+        glDeleteShader(fshader_);
+        fshader_ = 0;
+    }
+}
+
+
