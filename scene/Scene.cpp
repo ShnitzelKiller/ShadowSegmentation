@@ -157,11 +157,16 @@ size_t Scene::LoadMesh(const std::string &filename) {
     }
     if (!shapes[0].mesh.indices.empty())
     {
+        GLuint vind[shapes[0].mesh.indices.size()];
+        for (int i=0; i<shapes[0].mesh.indices.size(); i++) {
+            auto ind = shapes[0].mesh.indices[i];
+            vind[i] = (GLuint) ind.vertex_index;
+        }
         glGenBuffers(1, &indicesEBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesEBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                     shapes[0].mesh.indices.size() * sizeof(unsigned int),
-                     shapes[0].mesh.indices.data(), GL_STATIC_DRAW);
+                     sizeof(vind),
+                     vind, GL_STATIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
     //build vertex array object

@@ -7,7 +7,7 @@ add_subdirectory(glfw-3.2.1)
 
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
-include_directories(${OPENGL_INCLUDE_DIRS})
+#include_directories(${OPENGL_INCLUDE_DIRS})
 
 add_executable(Renderer main.cpp scene/Scene.h scene/Scene.cpp scene/Renderer.cpp scene/Renderer.h mathdebug.cpp mathdebug.h gl/shaders.h gl/shaders.cpp)
 target_link_libraries(Renderer tinyobjloader)
