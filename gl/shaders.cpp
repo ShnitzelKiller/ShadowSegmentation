@@ -4,6 +4,7 @@
 
 #include "shaders.h"
 #include <iostream>
+#include <string>
 
 const char* fragSource = R"glsl(
     #version 330 core

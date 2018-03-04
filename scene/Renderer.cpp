@@ -1,12 +1,14 @@
 //
 // Created by James Noeckel on 2/20/18.
 //
+#define GLM_ENABLE_EXPERIMENTAL
 
 #include <iostream>
 #include "Renderer.h"
 #include <glm/gtx/transform.hpp>
 #include "../mathdebug.h"
 #include "../gl/shaders.h"
+
 
 
 
