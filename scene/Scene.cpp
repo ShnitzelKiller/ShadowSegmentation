@@ -31,13 +31,13 @@ glm::mat4 PointLight::GetProjectionMatrix(float xmin, float ymin, float xmax, fl
     float aspect = half_width / half_height;
     glm::mat4 proj = glm::perspective(fovy, aspect, 0.1f, pos.z);*/
 
-    glm::mat4 proj = glm::ortho(xmin, xmax, ymin, ymax, 0.f, -10.f);
+    glm::mat4 proj = glm::ortho(xmin, xmax, ymin, ymax, 20.f, -20.f);
     float shearX = pos.x/pos.z;
     float shearY = pos.y/pos.z;
     proj[2][0] = -shearX;
     proj[2][1] = -shearY;
     proj[2][3] = -1.f/pos.z;
-
+    //TODO: correct depth
     return proj;
 }
 

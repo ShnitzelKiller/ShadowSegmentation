@@ -37,7 +37,7 @@ RenderTexture::RenderTexture(int width, int height, int num, GLuint internalform
     }
 }
 
-RenderTexture::RenderTexture(RenderTexture &&other) noexcept : tex(other.tex), fbo(other.fbo), zbuf(other.zbuf) {
+RenderTexture::RenderTexture(RenderTexture &&other) noexcept : tex(other.tex), fbo(other.fbo), zbuf(other.zbuf), count(other.count) {
     other.tex = nullptr;
     other.fbo = 0;
     other.zbuf = 0;
@@ -46,7 +46,7 @@ RenderTexture::RenderTexture(RenderTexture &&other) noexcept : tex(other.tex), f
 RenderTexture::~RenderTexture() {
     glDeleteRenderbuffers(1, &zbuf);
     glDeleteFramebuffers(1, &fbo);
-    if (tex != nullptr) {
+    if (tex) {
         glDeleteTextures(count, tex);
         delete[] tex;
     }

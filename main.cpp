@@ -55,8 +55,10 @@ int main() {
     s->AddInstance(roughCubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(-.5f,-.5f,1));
     s->AddInstance(roughCubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(.5f,.5f,2));
     //s->AddInstance(roughCubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,0,0));
-    auto *light = new DirectionalLight(-1, -1, -1);
+    auto *dirLight = new DirectionalLight(-1, -1, -1);
+    auto *light = new PointLight(3, 3, 3);
     s->AddLight(light);
+    s->AddLight(dirLight);
     auto *r = new Renderer(s, fwidth, fheight);
     r->Render();
     std::vector<GLuint> textures = r->GetImages();
@@ -103,7 +105,7 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);*/
 
-    glBindTexture(GL_TEXTURE_2D, textures[0]);
+    glBindTexture(GL_TEXTURE_2D, textures[1]);
     glUniform1i(texUniform, 0);
 
     GLuint vao;
@@ -141,7 +143,8 @@ int main() {
 
     do{
         ang += 0.02f;
-        light->dir = glm::vec3(cos(ang), sin(ang), -1);
+        dirLight->dir = glm::vec3(cos(ang), sin(ang), -1);
+        light->pos = glm::vec3(3*cos(ang), 3*sin(ang), 30 - 25*sin(ang/2));
         r->Render();
 
         program->Use();
