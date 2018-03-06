@@ -11,12 +11,34 @@
 
 
 glm::mat4 DirectionalLight::GetProjectionMatrix(float xmin, float ymin, float xmax, float ymax) {
-    glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
-    glm::mat4 proj = glm::ortho(xmin, xmax, ymin, ymax);
+    //glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
+    glm::mat4 proj = glm::ortho(xmin, xmax, ymin, ymax, 0.f, -10.f);
     float shearX = dir.x/dir.z;
     float shearY = dir.y/dir.z;
-    glm::mat4 shear(1, 0, -shearX, 0, 0, 1, -shearY, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-    return proj * view * shear;
+    glm::mat4 shear;
+    shear[2][0] = -shearX;
+    shear[2][1] = -shearY;
+    return proj * shear;
+}
+
+glm::mat4 PointLight::GetProjectionMatrix(float xmin, float ymin, float xmax, float ymax) {
+    glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
+    float x0 = (xmin + xmax) / 2.f;
+    float y0 = (ymin + ymax) / 2.f;
+    float half_height = ymax - y0;
+    float half_width = xmax - x0;
+    /*float fovy = 2 * atan(half_height / pos.z);
+    float aspect = half_width / half_height;
+    glm::mat4 proj = glm::perspective(fovy, aspect, 0.1f, pos.z);*/
+
+    glm::mat4 proj = glm::ortho(xmin, xmax, ymin, ymax, 0.f, -10.f);
+    float shearX = pos.x/pos.z;
+    float shearY = pos.y/pos.z;
+    proj[2][0] = -shearX;
+    proj[2][1] = -shearY;
+    proj[2][3] = -1.f/pos.z;
+
+    return proj;
 }
 
 
@@ -42,9 +64,23 @@ size_t Scene::AddInstance(size_t meshID, glm::vec3 scale, glm::vec3 rotationOrig
     return instances.size() - 1;
 }
 
-void Scene::AddDirectionalLight(glm::vec3 dir) {
+void Scene::SetTransform(size_t instanceID, glm::vec3 scale, glm::vec3 rotationOrigin, glm::quat rotation,
+                           glm::vec3 translation) {
+    Instance &inst = instances[instanceID];
+    inst.Scale = scale;
+    inst.RotationOrigin = rotationOrigin;
+    inst.Rotation = rotation;
+    inst.Translation = translation;
+    instances.push_back(inst);
+}
+
+/*void Scene::AddDirectionalLight(glm::vec3 dir) {
     auto light = new DirectionalLight();
     light->dir = dir;
+    lights.push_back(light);
+}*/
+
+void Scene::AddLight(Light *light) {
     lights.push_back(light);
 }
 
@@ -217,9 +253,9 @@ size_t Scene::LoadMesh(const std::string &filename) {
 }
 
 Scene::~Scene() {
-    for (auto it=lights.begin(); it != lights.end(); it++) {
+    /*for (auto it=lights.begin(); it != lights.end(); it++) {
         delete *it;
-    }
+    }*/
     for (Mesh m : meshes) {
         glDeleteVertexArrays(1, &m.MeshVAO);
         glDeleteBuffers(1, &m.IndexBO);

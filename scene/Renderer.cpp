@@ -12,18 +12,14 @@
 
 
 
-Renderer::Renderer(Scene *scene, int width, int height) {
-
-    this->width = width;
-    this->height = height;
-    this->scene = scene;
+Renderer::Renderer(Scene *scene, int width, int height) : scene(scene), width(width), height(height) {
     num_buffers = (int) scene->lights.size();
 
-    images = new GLuint[num_buffers];
-    glGenTextures(num_buffers, images);
-
-    framebuffers = new GLuint[num_buffers];
-    glGenFramebuffers(num_buffers, framebuffers);
+    rendertextures = std::vector<RenderTexture>();
+    for (int i=0; i<num_buffers; i++) {
+        RenderTexture rt(width, height);
+        rendertextures.push_back(std::move(rt));
+    }
 
     //create shaders
     program = new Program();
@@ -32,34 +28,13 @@ Renderer::Renderer(Scene *scene, int width, int height) {
 
     mvp_uniform = program->GetUniformLocation("mvp");
     nmw_uniform = program->GetUniformLocation("nmw");
-
-
-    //create framebuffers
-    for (int i=0; i<num_buffers; i++) {
-        glBindTexture(GL_TEXTURE_2D, images[i]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_BYTE, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[i]);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, images[i], 0);
-        GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-        if (fboStatus != GL_FRAMEBUFFER_COMPLETE) {
-            fprintf(stderr, "glCheckFramebufferStatus: %x\n", fboStatus);
-        }
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }
-    program->Unuse();
 }
 
 void Renderer::Render() {
     program->Use();
     for (size_t i=0; i<num_buffers; i++) {
 
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[i]);
-        GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-        glDrawBuffers(1, DrawBuffers);
+        rendertextures[i].Bind();
         glViewport(0, 0, width, height);
         glClearColor(1, 1, 1, 1);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -68,7 +43,7 @@ void Renderer::Render() {
 
         for (auto it = scene->instances.begin(); it != scene->instances.end(); it++) {
             Mesh m = scene->meshes[it->meshID];
-            std::cout << "drawing instance " << m.name << " (" << m.IndexCount << " indices)" << std::endl;
+            //std::cout << "drawing instance " << m.name << " (" << m.IndexCount << " indices)" << std::endl;
             glm::mat4 MW;
 
             MW = translate(-it->RotationOrigin) * MW;
@@ -80,8 +55,6 @@ void Renderer::Render() {
             glm::mat3 NMW;
             NMW = glm::mat3_cast(it->Rotation) * NMW;
             NMW = glm::mat3(scale(1.0f/(it->Scale))) * NMW;
-            printmat4(MVP);
-            printmat3(NMW);
 
             glUniformMatrix4fv(mvp_uniform, 1, GL_FALSE, &MVP[0][0]);
             glUniformMatrix3fv(nmw_uniform, 1, GL_FALSE, &NMW[0][0]);
@@ -90,21 +63,19 @@ void Renderer::Render() {
             glBindVertexArray(0);
         }
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        rendertextures[i].Unbind();
     }
     program->Unuse();
 }
 
 Renderer::~Renderer() {
-    glDeleteTextures(num_buffers, images);
-    glDeleteFramebuffers(num_buffers, framebuffers);
     delete program;
-    program = nullptr;
-    delete images;
-    delete framebuffers;
 }
 
-GLuint *Renderer::GetImages(size_t *length) {
-    *length = (size_t) num_buffers;
+std::vector<GLuint> Renderer::GetImages() {
+    std::vector<GLuint> images;
+    for (int i=0; i<num_buffers; i++) {
+        images.push_back(rendertextures[i].GetTextureIDs()[0]);
+    }
     return images;
 }

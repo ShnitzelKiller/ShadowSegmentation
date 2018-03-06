@@ -6,13 +6,10 @@
 #include "gl/shaders.h"
 #include <chrono>
 #include <thread>
+#include <math.h>
 
-#define SCREEN_WIDTH 1024
-#define SCREEN_HEIGHT 768
-
-Scene *s;
-Renderer *r;
-Program *program;
+#define SCREEN_WIDTH 500
+#define SCREEN_HEIGHT 500
 
 
 int main() {
@@ -50,25 +47,25 @@ int main() {
     glfwGetFramebufferSize(window, &fwidth, &fheight);
 
     std::cout << "framebuffer: " << fwidth << " x " << fheight << std::endl;
+    std::cout << "initializing" << std::endl;
 
     //build scene
-    s = new Scene(-2, -2, 2, 2);
-    size_t torusMeshID = s->LoadMesh("../data/torus.obj");
-    size_t triMeshID = s->AddTri(-1, -1, 0, 0, 0.2f, 0, 0, 1, 0);
-    s->AddInstance(torusMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(0.f, 1.f, 0.f)), glm::vec3(0,0,0));
-    s->AddInstance(triMeshID);
-    s->AddDirectionalLight(glm::vec3(0, 0, -1));
-    r = new Renderer(s, fwidth, fheight);
+    auto *s = new Scene(-4, -4, 4, 4);
+    size_t roughCubeMeshID = s->LoadMesh("../data/cube_noise.obj");
+    s->AddInstance(roughCubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(-.5f,-.5f,1));
+    s->AddInstance(roughCubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(.5f,.5f,2));
+    //s->AddInstance(roughCubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,0,0));
+    auto *light = new DirectionalLight(-1, -1, -1);
+    s->AddLight(light);
+    auto *r = new Renderer(s, fwidth, fheight);
     r->Render();
-    size_t n;
-    GLuint *textures = r->GetImages(&n);
-
+    std::vector<GLuint> textures = r->GetImages();
     //render to fullscreen quad
+    std::cout << "render result to fullscreen quad" << std::endl;
 
-    program = new Program();
+    auto *program = new Program();
     program->AttachShaders(simpleVertexShader, simpleFragShader);
     program->Link();
-    program->Use();
 
     /*GLint posAttrib = program->GetAttributeLocation("pos");
     GLint texAttrib = program->GetAttributeLocation("tex");*/
@@ -131,15 +128,28 @@ int main() {
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBindVertexArray(0);
 
-    glClearColor(0, 0, 0, 0);
+    //rendering
+
+    glClearColor(0, 0, 0, 1);
     glViewport(0, 0, fwidth, fheight);
 
+    float ang = 0;
+
+    std::cout << "render loop" << std::endl;
+
     do{
+        ang += 0.02f;
+        light->dir = glm::vec3(cos(ang), sin(ang), -1);
+        r->Render();
+
+        program->Use();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
+        glBindVertexArray(0);
         // Swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -148,19 +158,27 @@ int main() {
     while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
            glfwWindowShouldClose(window) == 0 );
 
+    GLuint err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        fprintf(stderr, "error %x 1", err);
+    }
+
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &tbo);
     glDeleteBuffers(1, &ebo);
     glDeleteVertexArrays(1, &vao);
     program->Unuse();
-    delete program;
-    delete s;
-    delete r;
 
-    GLuint err;
+    delete program;
     while ((err = glGetError()) != GL_NO_ERROR) {
         fprintf(stderr, "error %x", err);
     }
+    std::cout << "deleting scene & lights" << std::endl;
+    delete s;
+    delete light;
+    std::cout << "deleting renderer" << std::endl;
+    delete r;
 
+    std::cout << "exiting" << std::endl;
     return 0;
 }

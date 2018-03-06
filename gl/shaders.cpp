@@ -119,8 +119,11 @@ void Program::Link() {
 }
 
 Program::~Program() {
+    std::cout << "deleting shaders from program " << program_ << std::endl;
     DeleteShaders();
+    std::cout << "deleting program " << program_ << std::endl;
     glDeleteProgram(program_);
+    glUseProgram(0);
 }
 
 void Program::Use() {

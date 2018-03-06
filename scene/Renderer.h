@@ -8,17 +8,17 @@
 
 #include "Scene.h"
 #include "../gl/shaders.h"
+#include "../gl/RenderTexture.h"
 
 class Renderer {
 public:
     Renderer(Scene *scene, int width, int height);
     void Render();
     ~Renderer();
-    GLuint *GetImages(size_t *length);
+    std::vector<GLuint> GetImages();
 private:
     Scene *scene;
-    GLuint *framebuffers;
-    GLuint *images;
+    std::vector<RenderTexture> rendertextures;
     Program *program;
     GLint mvp_uniform;
     GLint nmw_uniform;
