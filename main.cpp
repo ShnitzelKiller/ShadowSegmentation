@@ -4,6 +4,7 @@
 #include "scene/Scene.h"
 #include "scene/Renderer.h"
 #include "gl/shaders.h"
+#include "ScreenspaceQuad.h"
 #include <chrono>
 #include <thread>
 #include <math.h>
@@ -47,111 +48,47 @@ int main() {
     glfwGetFramebufferSize(window, &fwidth, &fheight);
 
     std::cout << "framebuffer: " << fwidth << " x " << fheight << std::endl;
-    std::cout << "initializing" << std::endl;
+    std::cout << "loading scene..." << std::endl;
 
     //build scene
     auto *s = new Scene(-4, -4, 4, 4);
     size_t roughCubeMeshID = s->LoadMesh("../data/cube_noise.obj");
     s->AddInstance(roughCubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(-.5f,-.5f,1));
     s->AddInstance(roughCubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(.5f,.5f,2));
-    //s->AddInstance(roughCubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,0,0));
     auto *dirLight = new DirectionalLight(-1, -1, -1);
     auto *light = new PointLight(3, 3, 3);
     s->AddLight(light);
     s->AddLight(dirLight);
     auto *r = new Renderer(s, fwidth, fheight);
-    r->Render();
     std::vector<GLuint> textures = r->GetImages();
-    //render to fullscreen quad
-    std::cout << "render result to fullscreen quad" << std::endl;
 
-    auto *program = new Program();
-    program->AttachShaders(simpleVertexShader, simpleFragShader);
-    program->Link();
-
-    /*GLint posAttrib = program->GetAttributeLocation("pos");
-    GLint texAttrib = program->GetAttributeLocation("tex");*/
-
-    GLint texUniform = program->GetUniformLocation("image");
-
-    const float verts[] = {-1, 1,
-                            1, 1,
-                           -1, -1,
-                            1, -1};
-
-    const float texCoords[] = {
-            0, 1,
-            1, 1,
-            0, 0,
-            1, 0
-    };
-
-    const GLuint indices[] = {
-            3, 1, 0,
-            3, 0, 2
-    };
-
-    glActiveTexture(GL_TEXTURE0);
-
-    //debug texture
-    /*float pixels[] = {
-            0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f
-    };
-    GLuint test_tex;
-    glGenTextures(1, &test_tex);
-    glBindTexture(GL_TEXTURE_2D, test_tex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 3, 2, 0, GL_RGB, GL_FLOAT, pixels);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);*/
-
-    glBindTexture(GL_TEXTURE_2D, textures[1]);
-    glUniform1i(texUniform, 0);
-
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(0);
-
-    GLuint tbo;
-    glGenBuffers(1, &tbo);
-    glBindBuffer(GL_ARRAY_BUFFER, tbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(texCoords), texCoords, GL_STATIC_DRAW);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(1);
-
-    GLuint ebo;
-    glGenBuffers(1, &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    glBindVertexArray(0);
+    auto *quad = new ScreenspaceQuad();
 
     //rendering
-
-    glClearColor(0, 0, 0, 1);
-    glViewport(0, 0, fwidth, fheight);
 
     float ang = 0;
 
     std::cout << "render loop" << std::endl;
 
     do{
+        //run renderer
         ang += 0.02f;
-        dirLight->dir = glm::vec3(cos(ang), sin(ang), -1);
+        dirLight->dir = glm::vec3(-cos(ang), -sin(ang), -1);
         light->pos = glm::vec3(3*cos(ang), 3*sin(ang), 30 - 25*sin(ang/2));
         r->Render();
 
-        program->Use();
+        //show results
+        glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glBindVertexArray(vao);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glViewport(0, 0, fwidth/2, fheight);
+        quad->SetImage(textures[0]);
+        quad->Render();
+
+        glViewport(fwidth/2, 0, fwidth/2, fheight);
+        quad->SetImage(textures[1]);
+        quad->Render();
+
         glBindVertexArray(0);
         // Swap buffers
         glfwSwapBuffers(window);
@@ -166,16 +103,13 @@ int main() {
         fprintf(stderr, "error %x 1", err);
     }
 
-    glDeleteBuffers(1, &vbo);
-    glDeleteBuffers(1, &tbo);
-    glDeleteBuffers(1, &ebo);
-    glDeleteVertexArrays(1, &vao);
-    program->Unuse();
+    std::cout << "deleting screenspace quad" << std::endl;
+    delete quad;
 
-    delete program;
     while ((err = glGetError()) != GL_NO_ERROR) {
-        fprintf(stderr, "error %x", err);
+        fprintf(stderr, "error %x 2", err);
     }
+
     std::cout << "deleting scene & lights" << std::endl;
     delete s;
     delete light;
