@@ -13,6 +13,8 @@
 glm::mat4 DirectionalLight::GetProjectionMatrix(float xmin, float ymin, float xmax, float ymax) {
     //glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
     glm::mat4 proj = glm::ortho(xmin, xmax, ymin, ymax, 0.f, -10.f);
+    proj[2][2] = 0;
+    proj[3][2] = 0;
     float shearX = dir.x/dir.z;
     float shearY = dir.y/dir.z;
     glm::mat4 shear;
@@ -23,31 +25,20 @@ glm::mat4 DirectionalLight::GetProjectionMatrix(float xmin, float ymin, float xm
 
 glm::mat4 PointLight::GetProjectionMatrix(float xmin, float ymin, float xmax, float ymax) {
     glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
-    float x0 = (xmin + xmax) / 2.f;
-    float y0 = (ymin + ymax) / 2.f;
-    float half_height = ymax - y0;
-    float half_width = xmax - x0;
-    /*float fovy = 2 * atan(half_height / pos.z);
-    float aspect = half_width / half_height;
-    glm::mat4 proj = glm::perspective(fovy, aspect, 0.1f, pos.z);*/
-
-    glm::mat4 proj = glm::ortho(xmin, xmax, ymin, ymax, 20.f, -20.f);
+    glm::mat4 proj = glm::ortho(xmin, xmax, ymin, ymax, 0.f, -10.f);
+    proj[2][2] = 0;
+    proj[3][2] = 0;
+    proj[2][3] = -1.f/pos.z;
     float shearX = pos.x/pos.z;
     float shearY = pos.y/pos.z;
-    proj[2][0] = -shearX;
-    proj[2][1] = -shearY;
-    proj[2][3] = -1.f/pos.z;
-    //TODO: correct depth
-    return proj;
+    glm::mat4 shear;
+    shear[2][0] = -shearX;
+    shear[2][1] = -shearY;
+    return proj * shear;
 }
 
 
-Scene::Scene(float xmin, float ymin, float xmax, float ymax) : xmin(xmin), ymin(ymin), xmax(xmax), ymax(ymax) {
-    meshes = std::vector<Mesh>();
-    instances = std::vector<Instance>();
-    cameras = std::vector<Camera>();
-    materials = std::vector<Material>();
-}
+Scene::Scene(float xmin, float ymin, float xmax, float ymax) : xmin(xmin), ymin(ymin), xmax(xmax), ymax(ymax) { }
 
 size_t Scene::AddInstance(size_t meshID) {
     return AddInstance(meshID, glm::vec3(1,1,1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(0.f, 1.f, 0.f)), glm::vec3(0,0,0));
@@ -163,6 +154,7 @@ size_t Scene::LoadMesh(const std::string &filename) {
     GLuint indicesEBO = 0;
 
     if (!attrib.vertices.empty()) {
+        std::cout << "loaded " << attrib.vertices.size() << " vertices" << std::endl;
         glGenBuffers(1, &positionVBO);
         glBindBuffer(GL_ARRAY_BUFFER, positionVBO);
         glBufferData(GL_ARRAY_BUFFER,
@@ -175,6 +167,7 @@ size_t Scene::LoadMesh(const std::string &filename) {
 
     if (!attrib.texcoords.empty())
     {
+        std::cout << "loaded " << attrib.texcoords.size() << " texture coordinates" << std::endl;
         glGenBuffers(1, &texcoordVBO);
         glBindBuffer(GL_ARRAY_BUFFER, texcoordVBO);
         glBufferData(GL_ARRAY_BUFFER,
@@ -184,6 +177,7 @@ size_t Scene::LoadMesh(const std::string &filename) {
     }
     if (!attrib.normals.empty())
     {
+        std::cout << "loaded " << attrib.normals.size() << " normals" << std::endl;
         glGenBuffers(1, &normalVBO);
         glBindBuffer(GL_ARRAY_BUFFER, normalVBO);
         glBufferData(GL_ARRAY_BUFFER,
@@ -193,6 +187,7 @@ size_t Scene::LoadMesh(const std::string &filename) {
     }
     if (!shapes[0].mesh.indices.empty())
     {
+        std::cout << "loaded " << shapes[0].mesh.indices.size() << " mesh indices" << std::endl;
         GLuint vind[shapes[0].mesh.indices.size()];
         for (int i=0; i<shapes[0].mesh.indices.size(); i++) {
             auto ind = shapes[0].mesh.indices[i];
@@ -267,4 +262,8 @@ Scene::~Scene() {
 
 glm::mat4 Scene::GetProjectionMatrix(size_t i) {
     return lights[i]->GetProjectionMatrix(xmin, ymin, xmax, ymax);
+}
+
+void Scene::SetVisible(size_t instanceID, bool visible) {
+    instances[instanceID].active = visible;
 }

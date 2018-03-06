@@ -6,11 +6,6 @@
 #include <iostream>
 #include "Renderer.h"
 #include <glm/gtx/transform.hpp>
-#include "../mathdebug.h"
-#include "../gl/shaders.h"
-
-
-
 
 Renderer::Renderer(Scene *scene, int width, int height) : scene(scene), width(width), height(height) {
     num_buffers = (int) scene->lights.size();
@@ -42,6 +37,7 @@ void Renderer::Render() {
         glm::mat4 VP = scene->GetProjectionMatrix(i);
 
         for (auto it = scene->instances.begin(); it != scene->instances.end(); it++) {
+            if (!it->active) continue;
             Mesh m = scene->meshes[it->meshID];
             //std::cout << "drawing instance " << m.name << " (" << m.IndexCount << " indices)" << std::endl;
             glm::mat4 MW;

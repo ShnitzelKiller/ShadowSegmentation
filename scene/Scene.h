@@ -25,27 +25,6 @@ struct Mesh {
     std::vector<uint32_t> MaterialIDs;
 };
 
-struct Material
-{
-    std::string name;
-
-    float Ambient[3];
-    float Diffuse[3];
-};
-
-struct Camera
-{
-    // View
-    glm::vec3 Eye;
-    glm::vec3 Target;
-    glm::vec3 Up;
-
-    // Projection
-    float FovY;
-    float Aspect;
-    float ZNear;
-};
-
 struct Light {
     virtual glm::mat4 GetProjectionMatrix(float xmin, float ymin, float xmax, float ymax) = 0;
     virtual ~Light() = default;
@@ -65,7 +44,7 @@ struct PointLight : Light {
 
 struct Instance {
     size_t meshID;
-
+    bool active = true;
     glm::vec3 Scale;
     glm::vec3 RotationOrigin;
     glm::quat Rotation;
@@ -77,15 +56,14 @@ public:
     Scene(float xmin, float ymin, float xmax, float ymax);
     std::vector<Mesh> meshes;
     std::vector<Instance> instances;
-    std::vector<Camera> cameras;
     std::vector<Light*> lights;
-    std::vector<Material> materials;
     /**
      * Add an instance of the specified mesh, returning the instance ID in newInstanceID
      */
     size_t AddInstance(size_t meshID);
     size_t AddInstance(size_t meshID, glm::vec3 scale, glm::vec3 rotationOrigin, glm::quat rotation, glm::vec3 translation);
     void SetTransform(size_t instanceID, glm::vec3 scale, glm::vec3 rotationOrigin, glm::quat rotation, glm::vec3 translation);
+    void SetVisible(size_t instanceID, bool visible);
 
     //void AddDirectionalLight(glm::vec3 dir);
     void AddLight(Light *light);

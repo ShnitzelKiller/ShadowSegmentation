@@ -10,7 +10,7 @@
 #include <math.h>
 
 #define SCREEN_WIDTH 500
-#define SCREEN_HEIGHT 500
+#define SCREEN_HEIGHT 250
 
 
 int main() {
@@ -51,15 +51,15 @@ int main() {
     std::cout << "loading scene..." << std::endl;
 
     //build scene
-    auto *s = new Scene(-4, -4, 4, 4);
+    auto *s = new Scene(-6, -6, 6, 6);
     size_t roughCubeMeshID = s->LoadMesh("../data/cube_noise.obj");
-    s->AddInstance(roughCubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(-.5f,-.5f,1));
-    s->AddInstance(roughCubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(.5f,.5f,2));
+    s->AddInstance(roughCubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,0,1));
+    s->AddInstance(roughCubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/4, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(1,1,2));
     auto *dirLight = new DirectionalLight(-1, -1, -1);
     auto *light = new PointLight(3, 3, 3);
     s->AddLight(light);
     s->AddLight(dirLight);
-    auto *r = new Renderer(s, fwidth, fheight);
+    auto *r = new Renderer(s, fwidth / 4, fheight/2);
     std::vector<GLuint> textures = r->GetImages();
 
     auto *quad = new ScreenspaceQuad();
@@ -69,12 +69,13 @@ int main() {
     float ang = 0;
 
     std::cout << "render loop" << std::endl;
-
+    glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
     do{
         //run renderer
         ang += 0.02f;
         dirLight->dir = glm::vec3(-cos(ang), -sin(ang), -1);
-        light->pos = glm::vec3(3*cos(ang), 3*sin(ang), 30 - 25*sin(ang/2));
+        light->pos = glm::vec3(2.1*cos(ang), 2.1*sin(ang), 4.2);
         r->Render();
 
         //show results
