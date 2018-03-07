@@ -27,7 +27,7 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // We don't want the old OpenGL
 
-    GLFWwindow* window; // (In the accompanying source code, this variable is global for simplicity)
+    GLFWwindow* window;
     window = glfwCreateWindow( SCREEN_WIDTH, SCREEN_HEIGHT, "Display", NULL, NULL);
     if( window == NULL ){
         fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible.\n" );
@@ -87,19 +87,19 @@ int main() {
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glViewport(0, fheight/2, fwidth/2, fheight/2);
+        glViewport(0, fheight/2+1, fwidth/2-1, fheight/2-1);
         quad->SetImage(textures1[0]);
         quad->Render();
 
-        glViewport(0, 0, fwidth/2, fheight/2);
+        glViewport(0, 0, fwidth/2-1, fheight/2-1);
         quad->SetImage(textures1[1]);
         quad->Render();
 
-        glViewport(fwidth/2, fheight/2, fwidth/2, fheight/2);
+        glViewport(fwidth/2+1, fheight/2+1, fwidth/2-1, fheight/2-1);
         quad->SetImage(textures2[0]);
         quad->Render();
 
-        glViewport(fwidth/2, 0, fwidth/2, fheight/2);
+        glViewport(fwidth/2+1, 0, fwidth/2-1, fheight/2-1);
         quad->SetImage(textures2[1]);
         quad->Render();
 

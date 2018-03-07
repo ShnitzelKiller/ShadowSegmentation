@@ -61,7 +61,7 @@ const char* simpleFragShader = R"glsl(
     out vec4 fragColor;
 
     void main() {
-        fragColor = texture(image, T) + vec4(0, T * 0.5f, 0);
+        fragColor = texture(image, T);// + vec4(0, T * 0.5f, 0);
     }
 )glsl";
 
