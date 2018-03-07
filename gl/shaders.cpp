@@ -119,7 +119,7 @@ void Program::Link() {
 }
 
 Program::~Program() {
-    std::cout << "deleting program " << program_ << std::endl;
+    std::cout << "deleting shader " << program_ << std::endl;
     DeleteShaders();
     glDeleteProgram(program_);
     glUseProgram(0);
@@ -157,5 +157,44 @@ void Program::DeleteShaders() {
         fshader_ = 0;
     }
 }
+
+Program *Program::defaultShader = nullptr;
+Program *Program::simpleShader = nullptr;
+
+Program *Program::GetDefaultShader() {
+    if (!defaultShader) {
+        defaultShader = new Program();
+        defaultShader->AttachShaders(vertexSource, fragSource);
+        defaultShader->Link();
+    }
+    return defaultShader;
+}
+
+Program *Program::GetSimpleShader() {
+    if (!simpleShader) {
+        simpleShader = new Program();
+        simpleShader->AttachShaders(simpleVertexShader, simpleFragShader);
+        simpleShader->Link();
+    }
+    return simpleShader;
+}
+
+Program::Program(Program &&other) noexcept : program_(other.program_), vshader_(other.vshader_), fshader_(other.fshader_) {
+    other.program_ = 0;
+    other.vshader_ = 0;
+    other.fshader_ = 0;
+}
+
+void Program::DestroyShaders() {
+    if (defaultShader) {
+        delete defaultShader;
+        defaultShader = nullptr;
+    }
+    if (simpleShader) {
+        delete simpleShader;
+        simpleShader = nullptr;
+    }
+}
+
 
 

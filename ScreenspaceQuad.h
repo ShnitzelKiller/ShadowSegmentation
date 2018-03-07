@@ -16,7 +16,7 @@ public:
     void Render();
     ~ScreenspaceQuad();
 private:
-    Program program;
+    Program *program;
     GLint texUniform;
     GLuint vao;
     GLuint vbo;

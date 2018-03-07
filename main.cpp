@@ -59,7 +59,7 @@ int main() {
     auto *light = new PointLight(3, 3, 3);
     s->AddLight(light);
     s->AddLight(dirLight);
-    auto *r = new Renderer(s, fwidth / 4, fheight/2);
+    auto *r = new Renderer(s, 100, 100);
     std::vector<GLuint> textures = r->GetImages();
 
     auto *quad = new ScreenspaceQuad();
@@ -90,7 +90,6 @@ int main() {
         quad->SetImage(textures[1]);
         quad->Render();
 
-        glBindVertexArray(0);
         // Swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -99,24 +98,17 @@ int main() {
     while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
            glfwWindowShouldClose(window) == 0 );
 
-    GLuint err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        fprintf(stderr, "error %x 1", err);
-    }
-
-    std::cout << "deleting screenspace quad" << std::endl;
     delete quad;
-
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        fprintf(stderr, "error %x 2", err);
-    }
-
-    std::cout << "deleting scene & lights" << std::endl;
     delete s;
     delete light;
-    std::cout << "deleting renderer" << std::endl;
+    delete dirLight;
     delete r;
+    Program::DestroyShaders();
 
+    GLuint err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        fprintf(stderr, "error %x", err);
+    }
     std::cout << "exiting" << std::endl;
     return 0;
 }

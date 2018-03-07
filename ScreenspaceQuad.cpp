@@ -23,12 +23,11 @@ static const GLuint indices[] = {
 };
 
 ScreenspaceQuad::ScreenspaceQuad() {
-    program.AttachShaders(simpleVertexShader, simpleFragShader);
-    program.Link();
-    texUniform = program.GetUniformLocation("image");
-    program.Use();
+    program = Program::GetSimpleShader();
+    texUniform = program->GetUniformLocation("image");
+    program->Use();
     glUniform1i(texUniform, 0);
-    program.Unuse();
+    program->Unuse();
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -59,11 +58,11 @@ void ScreenspaceQuad::SetImage(GLuint tex) {
 }
 
 void ScreenspaceQuad::Render() {
-    program.Use();
+    program->Use();
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    program.Unuse();
+    program->Unuse();
 }
 
 

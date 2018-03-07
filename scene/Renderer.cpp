@@ -17,9 +17,7 @@ Renderer::Renderer(Scene *scene, int width, int height) : scene(scene), width(wi
     }
 
     //create shaders
-    program = new Program();
-    program->AttachShaders(vertexSource, fragSource);
-    program->Link();
+    program = Program::GetDefaultShader();
 
     mvp_uniform = program->GetUniformLocation("mvp");
     nmw_uniform = program->GetUniformLocation("nmw");
@@ -64,9 +62,7 @@ void Renderer::Render() {
     program->Unuse();
 }
 
-Renderer::~Renderer() {
-    delete program;
-}
+Renderer::~Renderer() = default;
 
 std::vector<GLuint> Renderer::GetImages() {
     std::vector<GLuint> images;

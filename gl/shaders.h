@@ -17,6 +17,7 @@ extern const char* simpleFragShader;
 class Program {
 public:
     Program();
+    Program(Program &&other) noexcept;
     void AttachVertexShader(const char* vshader);
     void AttachFragmentShader(const char* fshader);
     void AttachShaders(const char* vshader, const char* fshader);
@@ -27,11 +28,16 @@ public:
     GLint GetUniformLocation(const char* name);
     void BindAttribLocation(GLuint index, const char* name);
     ~Program();
+    static Program *GetDefaultShader();
+    static Program *GetSimpleShader();
+    static void DestroyShaders();
 private:
     void DeleteShaders();
     GLuint program_;
     GLuint vshader_;
     GLuint fshader_;
+    static Program *defaultShader;
+    static Program *simpleShader;
 };
 
 #endif //RENDERER_SHADERS_H
