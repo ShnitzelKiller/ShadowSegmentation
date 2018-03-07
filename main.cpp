@@ -5,12 +5,13 @@
 #include "scene/Renderer.h"
 #include "gl/shaders.h"
 #include "ScreenspaceQuad.h"
+#include "ParallelSceneRenderer.h"
 #include <chrono>
 #include <thread>
 #include <math.h>
 
 #define SCREEN_WIDTH 500
-#define SCREEN_HEIGHT 250
+#define SCREEN_HEIGHT 500
 
 
 int main() {
@@ -51,16 +52,20 @@ int main() {
     std::cout << "loading scene..." << std::endl;
 
     //build scene
-    auto *s = new Scene(-6, -6, 6, 6);
-    size_t roughCubeMeshID = s->LoadMesh("../data/cube_noise.obj");
-    s->AddInstance(roughCubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,0,1));
-    s->AddInstance(roughCubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/4, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(1,1,2));
+
+    auto *pr = new ParallelSceneRenderer(-6, -6, 6, 6, 250, 250);
+    size_t cubeMeshID = pr->LoadMesh("../data/cube.obj","../data/cube_noise.obj");
+    pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,0,1));
+    pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/4, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(1,1,2));
     auto *dirLight = new DirectionalLight(-1, -1, -1);
     auto *light = new PointLight(3, 3, 3);
-    s->AddLight(light);
-    s->AddLight(dirLight);
-    auto *r = new Renderer(s, 100, 100);
-    std::vector<GLuint> textures = r->GetImages();
+    pr->AddLight(light);
+    pr->AddLight(dirLight);
+
+
+    std::vector<GLuint> textures1;
+    std::vector<GLuint> textures2;
+    pr->GetImages(textures1, textures2);
 
     auto *quad = new ScreenspaceQuad();
 
@@ -76,18 +81,26 @@ int main() {
         ang += 0.02f;
         dirLight->dir = glm::vec3(-cos(ang), -sin(ang), -1);
         light->pos = glm::vec3(2.1*cos(ang), 2.1*sin(ang), 4.2);
-        r->Render();
+        pr->Render();
 
         //show results
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glViewport(0, 0, fwidth/2, fheight);
-        quad->SetImage(textures[0]);
+        glViewport(0, fheight/2, fwidth/2, fheight/2);
+        quad->SetImage(textures1[0]);
         quad->Render();
 
-        glViewport(fwidth/2, 0, fwidth/2, fheight);
-        quad->SetImage(textures[1]);
+        glViewport(0, 0, fwidth/2, fheight/2);
+        quad->SetImage(textures1[1]);
+        quad->Render();
+
+        glViewport(fwidth/2, fheight/2, fwidth/2, fheight/2);
+        quad->SetImage(textures2[0]);
+        quad->Render();
+
+        glViewport(fwidth/2, 0, fwidth/2, fheight/2);
+        quad->SetImage(textures2[1]);
         quad->Render();
 
         // Swap buffers
@@ -99,10 +112,9 @@ int main() {
            glfwWindowShouldClose(window) == 0 );
 
     delete quad;
-    delete s;
     delete light;
     delete dirLight;
-    delete r;
+    delete pr;
     Program::DestroyShaders();
 
     GLuint err;

@@ -17,6 +17,7 @@ public:
     ~Renderer();
     std::vector<GLuint> GetImages();
 private:
+    void Update();
     Scene *scene;
     std::vector<RenderTexture> rendertextures;
     Program *program;

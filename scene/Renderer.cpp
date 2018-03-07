@@ -24,6 +24,7 @@ Renderer::Renderer(Scene *scene, int width, int height) : scene(scene), width(wi
 }
 
 void Renderer::Render() {
+    Update();
     program->Use();
     for (size_t i=0; i<num_buffers; i++) {
 
@@ -65,9 +66,20 @@ void Renderer::Render() {
 Renderer::~Renderer() = default;
 
 std::vector<GLuint> Renderer::GetImages() {
+    Update();
     std::vector<GLuint> images;
     for (int i=0; i<num_buffers; i++) {
-        images.push_back(rendertextures[i].GetTextureIDs()[0]);
+        RenderTexture &curr = rendertextures[i];
+        GLuint *tex = curr.GetTextureIDs();
+        images.push_back(tex[0]);
     }
     return images;
+}
+
+void Renderer::Update() {
+    for (size_t i=num_buffers; i<scene->lights.size(); i++) {
+        RenderTexture rt(width, height);
+        rendertextures.push_back(std::move(rt));
+    }
+    num_buffers = (int) scene->lights.size();
 }
