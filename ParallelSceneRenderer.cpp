@@ -44,3 +44,33 @@ ParallelSceneRenderer::SetTransform(size_t instanceID, glm::vec3 scale, glm::vec
     s1->SetTransform(instanceID, scale, rotationOrigin, rotation, translation);
     s2->SetTransform(instanceID, scale, rotationOrigin, rotation, translation);
 }
+
+void ParallelSceneRenderer::Render1() {
+    r1->Render();
+}
+
+void ParallelSceneRenderer::Render2() {
+    r2->Render();
+}
+
+void ParallelSceneRenderer::Render() {
+    r1->Render();
+    r2->Render();
+}
+
+void ParallelSceneRenderer::GetImages(std::vector<GLuint> &imgs1, std::vector<GLuint> &imgs2) {
+    for (auto im : r1->GetImages()) {
+        imgs1.push_back(im);
+    }
+    for (auto im : r2->GetImages()) {
+        imgs2.push_back(im);
+    }
+}
+
+void ParallelSceneRenderer::SetVisible1(size_t instance, bool vis) {
+    s1->SetVisible(instance, vis);
+}
+
+void ParallelSceneRenderer::SetVisible2(size_t instance, bool vis) {
+    s2->SetVisible(instance, vis);
+}

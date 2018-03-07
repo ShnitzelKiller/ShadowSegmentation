@@ -18,6 +18,12 @@ public:
     size_t AddInstance(size_t meshesID, glm::vec3 scale, glm::vec3 rotationOrigin, glm::quat rotation, glm::vec3 translation);
     void SetTransform(size_t instanceID, glm::vec3 scale, glm::vec3 rotationOrigin, glm::quat rotation, glm::vec3 translation);
     void AddLight(Light *light);
+    void SetVisible1(size_t instance, bool vis);
+    void SetVisible2(size_t instance, bool vis);
+    void Render();
+    void Render1();
+    void Render2();
+    void GetImages(std::vector<GLuint> &imgs1, std::vector<GLuint> &imgs2);
     ~ParallelSceneRenderer();
 private:
     Renderer* r1;
