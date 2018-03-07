@@ -145,7 +145,7 @@ size_t Scene::LoadMesh(const std::string &filename) {
     tinyobj::attrib_t attrib;
     std::string err;
     if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &err, filename.c_str())) {
-        fprintf(stderr, "failed to load %s", filename.c_str());
+        fprintf(stderr, "failed to load %s: %s", filename.c_str(), err.c_str());
         return 0;
     }
     GLuint positionVBO = 0;

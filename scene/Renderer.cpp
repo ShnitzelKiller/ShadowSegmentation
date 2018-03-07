@@ -83,3 +83,15 @@ void Renderer::Update() {
     }
     num_buffers = (int) scene->lights.size();
 }
+
+int Renderer::GetWidth() const {
+    return width;
+}
+
+int Renderer::GetHeight() const {
+    return height;
+}
+
+void Renderer::ReadImageData(void *buffer, GLenum format, GLenum type) {
+    glReadPixels(0, 0, width, height, format, type, buffer);
+}

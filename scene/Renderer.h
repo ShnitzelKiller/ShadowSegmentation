@@ -16,6 +16,9 @@ public:
     void Render();
     ~Renderer();
     std::vector<GLuint> GetImages();
+    int GetWidth() const;
+    int GetHeight() const;
+    void ReadImageData(void *buffer, GLenum format, GLenum type);
 private:
     void Update();
     Scene *scene;

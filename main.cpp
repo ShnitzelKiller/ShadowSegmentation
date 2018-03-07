@@ -8,13 +8,13 @@
 #include "ParallelSceneRenderer.h"
 #include <chrono>
 #include <thread>
-#include <math.h>
-
+#include <opencv/cv.h>
 #define SCREEN_WIDTH 500
 #define SCREEN_HEIGHT 500
 
 
-int main() {
+int main(int argc, char** argv) {
+    std::cout << std::string(argv[0]) << std::endl;
 
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
@@ -54,7 +54,7 @@ int main() {
     //build scene
 
     auto *pr = new ParallelSceneRenderer(-6, -6, 6, 6, 250, 250);
-    size_t cubeMeshID = pr->LoadMesh("../data/cube.obj","../data/cube_noise.obj");
+    size_t cubeMeshID = pr->LoadMesh("../../data/cube.obj","../../data/cube_noise.obj");
     pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,0,1));
     pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/4, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(1,1,2));
     auto *dirLight = new DirectionalLight(-1, -1, -1);
@@ -103,10 +103,12 @@ int main() {
         quad->SetImage(textures2[1]);
         quad->Render();
 
+
+
         // Swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
-        std::this_thread::sleep_for(std::chrono::milliseconds(34));
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
     } // Check if the ESC key was pressed or the window was closed
     while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
            glfwWindowShouldClose(window) == 0 );
