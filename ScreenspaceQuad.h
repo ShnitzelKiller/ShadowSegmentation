@@ -13,11 +13,12 @@ class ScreenspaceQuad {
 public:
     ScreenspaceQuad();
     void SetImage(GLuint tex);
-    void Render();
+    void Render(bool invert = false);
     ~ScreenspaceQuad();
 private:
     Program *program;
     GLint texUniform;
+    GLint invertUniform;
     GLuint vao;
     GLuint vbo;
     GLuint tbo;

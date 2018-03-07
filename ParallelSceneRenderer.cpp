@@ -4,11 +4,11 @@
 
 #include "ParallelSceneRenderer.h"
 
-ParallelSceneRenderer::ParallelSceneRenderer(float xmin, float ymin, float xmax, float ymax, int width, int height) {
+ParallelSceneRenderer::ParallelSceneRenderer(float xmin, float ymin, float xmax, float ymax, int width, int height, GLenum internalformat) {
     s1 = new Scene(xmin, ymin, xmax, ymax);
     s2 = new Scene(xmin, ymin, xmax, ymax);
-    r1 = new Renderer(s1, width, height);
-    r2 = new Renderer(s2, width, height);
+    r1 = new Renderer(s1, width, height, internalformat);
+    r2 = new Renderer(s2, width, height, internalformat);
 }
 
 ParallelSceneRenderer::~ParallelSceneRenderer() {
@@ -73,4 +73,20 @@ void ParallelSceneRenderer::SetVisible1(size_t instance, bool vis) {
 
 void ParallelSceneRenderer::SetVisible2(size_t instance, bool vis) {
     s2->SetVisible(instance, vis);
+}
+
+int ParallelSceneRenderer::GetHeight() const {
+    return r1->GetWidth();
+}
+
+int ParallelSceneRenderer::GetWidth() const {
+    return r1->GetHeight();
+}
+
+void ParallelSceneRenderer::ReadImageData1(void *buffer, GLenum format, GLenum type, int index) {
+    r1->ReadImageData(buffer, format, type, index);
+}
+
+void ParallelSceneRenderer::ReadImageData2(void *buffer, GLenum format, GLenum type, int index) {
+    r2->ReadImageData(buffer, format, type, index);
 }

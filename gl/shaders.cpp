@@ -6,19 +6,6 @@
 #include <iostream>
 #include <string>
 
-const char* fragSource = R"glsl(
-    #version 330 core
-
-    out vec4 outColor;
-    in vec2 T;
-    in vec3 N;
-
-    void main()
-    {
-        outColor = vec4(0.0, 0.0, 0.0, 1.0);
-    }
-)glsl";
-
 const char* vertexSource = R"glsl(
 #version 330 core
 
@@ -39,6 +26,19 @@ void main()
     gl_Position = mvp * vec4(position, 1.0);
 })glsl";
 
+const char* fragSource = R"glsl(
+    #version 330 core
+
+    out vec4 outColor;
+    in vec2 T;
+    in vec3 N;
+
+    void main()
+    {
+        outColor = vec4(0.0, 0.0, 0.0, 0.0);
+    }
+)glsl";
+
 const char* simpleVertexShader = R"glsl(
     #version 330 core
 
@@ -57,11 +57,13 @@ const char* simpleFragShader = R"glsl(
     #version 330 core
 
     uniform sampler2D image;
+    uniform float invert;
     in vec2 T;
     out vec4 fragColor;
 
     void main() {
-        fragColor = texture(image, T);// + vec4(0, T * 0.5f, 0);
+        vec4 col = texture(image, T);
+        fragColor = invert > 0.5 ? 1.0-col : col;
     }
 )glsl";
 

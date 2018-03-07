@@ -7,12 +7,12 @@
 #include "Renderer.h"
 #include <glm/gtx/transform.hpp>
 
-Renderer::Renderer(Scene *scene, int width, int height) : scene(scene), width(width), height(height) {
+Renderer::Renderer(Scene *scene, int width, int height, GLenum internalformat) : scene(scene), width(width), height(height), internalformat(internalformat) {
     num_buffers = (int) scene->lights.size();
 
     rendertextures = std::vector<RenderTexture>();
     for (int i=0; i<num_buffers; i++) {
-        RenderTexture rt(width, height);
+        RenderTexture rt(width, height, 1, internalformat);
         rendertextures.push_back(std::move(rt));
     }
 
@@ -26,12 +26,12 @@ Renderer::Renderer(Scene *scene, int width, int height) : scene(scene), width(wi
 void Renderer::Render() {
     Update();
     program->Use();
-    for (size_t i=0; i<num_buffers; i++) {
 
+    for (size_t i=0; i<num_buffers; i++) {
         rendertextures[i].Bind();
         glViewport(0, 0, width, height);
         glClearColor(1, 1, 1, 1);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 VP = scene->GetProjectionMatrix(i);
 
@@ -78,7 +78,7 @@ std::vector<GLuint> Renderer::GetImages() {
 
 void Renderer::Update() {
     for (size_t i=num_buffers; i<scene->lights.size(); i++) {
-        RenderTexture rt(width, height);
+        RenderTexture rt(width, height, 1, internalformat);
         rendertextures.push_back(std::move(rt));
     }
     num_buffers = (int) scene->lights.size();
@@ -92,6 +92,8 @@ int Renderer::GetHeight() const {
     return height;
 }
 
-void Renderer::ReadImageData(void *buffer, GLenum format, GLenum type) {
+void Renderer::ReadImageData(void *buffer, GLenum format, GLenum type, int index) {
+    rendertextures[index].Bind();
     glReadPixels(0, 0, width, height, format, type, buffer);
+    rendertextures[index].Unbind();
 }

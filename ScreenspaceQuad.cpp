@@ -25,8 +25,10 @@ static const GLuint indices[] = {
 ScreenspaceQuad::ScreenspaceQuad() {
     program = Program::GetSimpleShader();
     texUniform = program->GetUniformLocation("image");
+    invertUniform = program->GetUniformLocation("invert");
     program->Use();
     glUniform1i(texUniform, 0);
+    glUniform1f(invertUniform, 0.0f);
     program->Unuse();
 
     glGenVertexArrays(1, &vao);
@@ -57,8 +59,13 @@ void ScreenspaceQuad::SetImage(GLuint tex) {
     glBindTexture(GL_TEXTURE_2D, tex);
 }
 
-void ScreenspaceQuad::Render() {
+void ScreenspaceQuad::Render(bool invert) {
     program->Use();
+    if (invert) {
+        glUniform1f(invertUniform, 1.0f);
+    } else {
+        glUniform1f(invertUniform, 0.0f);
+    }
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);

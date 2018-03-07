@@ -12,13 +12,13 @@
 
 class Renderer {
 public:
-    Renderer(Scene *scene, int width, int height);
+    Renderer(Scene *scene, int width, int height, GLenum internalformat = GL_RGBA);
     void Render();
     ~Renderer();
     std::vector<GLuint> GetImages();
     int GetWidth() const;
     int GetHeight() const;
-    void ReadImageData(void *buffer, GLenum format, GLenum type);
+    void ReadImageData(void *buffer, GLenum format, GLenum type, int index);
 private:
     void Update();
     Scene *scene;
@@ -29,6 +29,7 @@ private:
     int width;
     int height;
     int num_buffers;
+    GLenum internalformat;
 };
 
 

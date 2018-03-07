@@ -17,6 +17,7 @@ public:
     GLuint *GetTextureIDs();
     void Bind();
     void Unbind();
+    void Clear(float r, float g, float b, float a);
 private:
     GLuint fbo;
     GLuint *tex;

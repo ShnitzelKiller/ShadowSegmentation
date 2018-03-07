@@ -9,8 +9,11 @@
 #include <chrono>
 #include <thread>
 #include <opencv/cv.h>
+
 #define SCREEN_WIDTH 500
 #define SCREEN_HEIGHT 500
+#define RENDER_WIDTH 250
+#define RENDER_HEIGHT 250
 
 
 int main(int argc, char** argv) {
@@ -53,7 +56,7 @@ int main(int argc, char** argv) {
 
     //build scene
 
-    auto *pr = new ParallelSceneRenderer(-6, -6, 6, 6, 250, 250);
+    auto *pr = new ParallelSceneRenderer(-6, -6, 6, 6, RENDER_WIDTH, RENDER_HEIGHT, GL_RGBA);
     size_t cubeMeshID = pr->LoadMesh("../../data/cube.obj","../../data/cube_noise.obj");
     pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,0,1));
     pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/4, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(1,1,2));
@@ -61,7 +64,6 @@ int main(int argc, char** argv) {
     auto *light = new PointLight(3, 3, 3);
     pr->AddLight(light);
     pr->AddLight(dirLight);
-
 
     std::vector<GLuint> textures1;
     std::vector<GLuint> textures2;
@@ -76,15 +78,27 @@ int main(int argc, char** argv) {
     std::cout << "render loop" << std::endl;
     glCullFace(GL_BACK);
     glEnable(GL_CULL_FACE);
+
+    //initialize test image
+//    GLuint temp;
+//    glGenTextures(1, &temp);
+//    glBindTexture(GL_TEXTURE_2D, temp);
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, RENDER_WIDTH, RENDER_HEIGHT, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    auto *rtdiff = new RenderTexture(RENDER_WIDTH, RENDER_HEIGHT, 1, GL_RGBA);
+    auto *rtint = new RenderTexture(RENDER_WIDTH, RENDER_HEIGHT, 1, GL_RGBA);
     do{
+
         //run renderer
         ang += 0.02f;
         dirLight->dir = glm::vec3(-cos(ang), -sin(ang), -1);
-        light->pos = glm::vec3(2.1*cos(ang), 2.1*sin(ang), 4.2);
+        light->pos = glm::vec3(2.1*cos(ang), 2.1*sin(ang), 5.2);
         pr->Render();
 
         //show results
-        glClearColor(0, 0, 0, 1);
+        glClearColor(0, 1, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glViewport(0, fheight/2+1, fwidth/2-1, fheight/2-1);
@@ -103,16 +117,69 @@ int main(int argc, char** argv) {
         quad->SetImage(textures2[1]);
         quad->Render();
 
+        //Read download and process image using opencv
+        {
+            pr->SetVisible2(0, false);
+            pr->Render2();
+
+            rtint->Clear(0,0,0,0);
+            rtint->Bind();
+            glViewport(0,0,RENDER_WIDTH, RENDER_HEIGHT);
+            quad->SetImage(textures2[0]);
+            quad->Render();
+            rtint->Unbind();
+            pr->SetVisible2(0, true);
+            pr->SetVisible2(1, false);
+            pr->Render2();
+            rtint->Bind();
+            glBlendEquation(GL_FUNC_ADD);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glEnable(GL_BLEND);
+            quad->Render();
+            glDisable(GL_BLEND);
+            rtint->Unbind();
+
+            rtdiff->Clear(0,0,0,0);
+            rtdiff->Bind();
+            glViewport(0,0,RENDER_WIDTH, RENDER_HEIGHT);
+            quad->SetImage(textures2[0]);
+            quad->Render(true);
+
+            glBlendEquation(GL_FUNC_ADD);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glEnable(GL_BLEND);
+            quad->SetImage(textures1[0]);
+            quad->Render();
+            quad->SetImage(rtint->GetTextureIDs()[0]);
+            glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
+            quad->Render();
+            rtdiff->Unbind();
+            glDisable(GL_BLEND);
+
+            pr->SetVisible2(1, true);
+            pr->Render2();
+
+            //display processed image as a test
+            glViewport(fwidth/4, fheight/4, fwidth/2 ,fheight/2);
+            quad->SetImage(rtdiff->GetTextureIDs()[0]);
+            quad->Render();
+        }
+
 
 
         // Swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));
     } // Check if the ESC key was pressed or the window was closed
     while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
            glfwWindowShouldClose(window) == 0 );
+    //delete test image
+//    glBindTexture(GL_TEXTURE_2D, 0);
+//    glDeleteTextures(1, &temp);
 
+    delete rtdiff;
+    delete rtint;
     delete quad;
     delete light;
     delete dirLight;

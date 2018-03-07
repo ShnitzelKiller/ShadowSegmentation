@@ -4,6 +4,7 @@
 
 #include "RenderTexture.h"
 #include <cstdio>
+#include <iostream>
 
 RenderTexture::RenderTexture(int width, int height, int num, GLuint internalformat) : count(num) {
     tex = new GLuint[num];
@@ -66,4 +67,11 @@ void RenderTexture::Bind() {
 
 void RenderTexture::Unbind() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void RenderTexture::Clear(float r, float g, float b, float a) {
+    Bind();
+    glClearColor(r, g, b, a);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    Unbind();
 }
