@@ -16,6 +16,7 @@ public:
     void Render(bool invert = false);
     ~ScreenspaceQuad();
 private:
+    void SetupVertexData();
     Program *program;
     GLint texUniform;
     GLint invertUniform;

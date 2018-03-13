@@ -117,9 +117,9 @@ int main(int argc, char** argv) {
         quad->SetImage(textures2[1]);
         quad->Render();
 
-        //Read download and process image using opencv
+        //Composite real and fake to remove partial shadow
         {
-            pr->SetVisible2(0, false);
+            pr->SetVisible2(1, false);
             pr->Render2();
 
             rtint->Clear(0,0,0,0);
@@ -128,8 +128,8 @@ int main(int argc, char** argv) {
             quad->SetImage(textures2[0]);
             quad->Render();
             rtint->Unbind();
-            pr->SetVisible2(0, true);
-            pr->SetVisible2(1, false);
+            pr->SetVisible2(1, true);
+            pr->SetVisible2(0, false);
             pr->Render2();
             rtint->Bind();
             glBlendEquation(GL_FUNC_ADD);
@@ -156,7 +156,7 @@ int main(int argc, char** argv) {
             rtdiff->Unbind();
             glDisable(GL_BLEND);
 
-            pr->SetVisible2(1, true);
+            pr->SetVisible2(0, true);
             pr->Render2();
 
             //display processed image as a test
