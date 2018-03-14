@@ -7,6 +7,7 @@
 #include "ScreenspaceQuad.h"
 #include "ParallelSceneRenderer.h"
 #include "BasicQuad.h"
+#include "DilateQuad.h"
 #include <chrono>
 #include <thread>
 #include <opencv/cv.h>
@@ -73,6 +74,15 @@ int main(int argc, char** argv) {
     auto *quad = new BasicQuad();
     quad->Init();
 
+    auto *dilate = new DilateQuad(fwidth, fheight);
+    dilate->Init();
+    dilate->SetRadius(10);
+
+    GLuint err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        fprintf(stderr, "error %x before loop", err);
+    }
+
     //rendering
 
     float ang = 0;
@@ -105,8 +115,8 @@ int main(int argc, char** argv) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glViewport(0, fheight/2+1, fwidth/2-1, fheight/2-1);
-        quad->SetImage(textures1[0]);
-        quad->Render();
+        dilate->SetImage(textures1[0]);
+        dilate->Render();
 
         glViewport(0, 0, fwidth/2-1, fheight/2-1);
         quad->SetImage(textures1[1]);
@@ -189,6 +199,7 @@ int main(int argc, char** argv) {
     delete rtdiff;
     delete rtint;
     delete quad;
+    delete dilate;
     delete light;
     delete dirLight;
     delete pr;

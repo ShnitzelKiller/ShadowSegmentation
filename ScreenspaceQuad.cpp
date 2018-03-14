@@ -50,10 +50,13 @@ ScreenspaceQuad::ScreenspaceQuad() {
 void ScreenspaceQuad::SetImage(GLuint tex) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, tex);
+    textureID = tex;
 }
 
 void ScreenspaceQuad::Render() {
     program->Use();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureID);
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);

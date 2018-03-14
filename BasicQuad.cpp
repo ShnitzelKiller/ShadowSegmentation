@@ -13,10 +13,6 @@ void BasicQuad::SetUniforms() {
     program->Use();
     glUniform1f(invertUniform, 0);
     std::cout << "calling updated setUniforms " << invertUniform << std::endl;
-    GLuint err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        fprintf(stderr, "error %x", err);
-    }
     program->Unuse();
 
 }

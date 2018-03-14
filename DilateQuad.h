@@ -7,12 +7,17 @@
 
 
 #include "ScreenspaceQuad.h"
+#include "gl/RenderTexture.h"
 
 class DilateQuad : public ScreenspaceQuad {
 public:
-    void SetRadius(int rad);
+    DilateQuad(int width, int height, int radius=1);
     void Render() override;
+    void SetRadius(int rad);
 private:
+    int width, height;
+    int radius;
+    RenderTexture rt;
 protected:
     void SetUniforms() override;
     void GetShader() override;

@@ -79,12 +79,14 @@ const char* dilateFragShader = R"glsl(
     out vec4 fragColor;
 
     void main() {
-        vec4 col = texture(image, T);
-
+        vec4 col = vec4(0, 0, 0, 0);
+        vec2 wh = vec2(width, height);
         int i;
-        for (i=0; i<dim; i++) {
-            T[dim] += 1.0;
-            col = max(col, texture(image, T));
+        vec2 disp = vec2(0, 0);
+        for (i=-radius; i<=radius; i++) {
+            disp[dim] = i;
+            vec4 tempcol = texture(image, T + disp/wh);
+            col += tempcol / (radius * 2 + 1);
         }
         fragColor = col;
     }
@@ -217,6 +219,7 @@ Program *Program::GetDilateShader() {
     if (!dilateShader) {
         dilateShader = new Program();
         dilateShader->AttachShaders(simpleVertexShader, dilateFragShader);
+        dilateShader->Link();
     }
     return dilateShader;
 }

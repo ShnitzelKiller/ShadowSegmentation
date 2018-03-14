@@ -26,6 +26,7 @@ protected:
     GLint texUniform;
     virtual void SetUniforms();
     virtual void GetShader();
+    GLuint textureID;
 };
 
 
