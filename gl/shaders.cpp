@@ -67,6 +67,29 @@ const char* simpleFragShader = R"glsl(
     }
 )glsl";
 
+const char* dilateFragShader = R"glsl(
+    #version 330 core
+
+    uniform sampler2D image;
+    uniform int radius;
+    uniform int dim;
+    uniform int width;
+    uniform int height;
+    in vec2 T;
+    out vec4 fragColor;
+
+    void main() {
+        vec4 col = texture(image, T);
+
+        int i;
+        for (i=0; i<dim; i++) {
+            T[dim] += 1.0;
+            col = max(col, texture(image, T));
+        }
+        fragColor = col;
+    }
+)glsl";
+
 Program::Program() : vshader_(0), fshader_(0) {
     program_ = glCreateProgram();
 }
@@ -160,8 +183,17 @@ void Program::DeleteShaders() {
     }
 }
 
+Program::Program(Program &&other) noexcept : program_(other.program_), vshader_(other.vshader_), fshader_(other.fshader_) {
+    other.program_ = 0;
+    other.vshader_ = 0;
+    other.fshader_ = 0;
+}
+
+//static stuff
+
 Program *Program::defaultShader = nullptr;
 Program *Program::simpleShader = nullptr;
+Program *Program::dilateShader = nullptr;
 
 Program *Program::GetDefaultShader() {
     if (!defaultShader) {
@@ -181,10 +213,12 @@ Program *Program::GetSimpleShader() {
     return simpleShader;
 }
 
-Program::Program(Program &&other) noexcept : program_(other.program_), vshader_(other.vshader_), fshader_(other.fshader_) {
-    other.program_ = 0;
-    other.vshader_ = 0;
-    other.fshader_ = 0;
+Program *Program::GetDilateShader() {
+    if (!dilateShader) {
+        dilateShader = new Program();
+        dilateShader->AttachShaders(simpleVertexShader, dilateFragShader);
+    }
+    return dilateShader;
 }
 
 void Program::DestroyShaders() {
@@ -195,6 +229,10 @@ void Program::DestroyShaders() {
     if (simpleShader) {
         delete simpleShader;
         simpleShader = nullptr;
+    }
+    if (dilateShader) {
+        delete dilateShader;
+        dilateShader = nullptr;
     }
 }
 

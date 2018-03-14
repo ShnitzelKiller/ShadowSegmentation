@@ -30,6 +30,7 @@ public:
     ~Program();
     static Program *GetDefaultShader();
     static Program *GetSimpleShader();
+    static Program *GetDilateShader();
     static void DestroyShaders();
 private:
     void DeleteShaders();
@@ -38,6 +39,7 @@ private:
     GLuint fshader_;
     static Program *defaultShader;
     static Program *simpleShader;
+    static Program *dilateShader;
 };
 
 #endif //RENDERER_SHADERS_H

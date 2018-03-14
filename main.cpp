@@ -6,6 +6,7 @@
 #include "gl/shaders.h"
 #include "ScreenspaceQuad.h"
 #include "ParallelSceneRenderer.h"
+#include "BasicQuad.h"
 #include <chrono>
 #include <thread>
 #include <opencv/cv.h>
@@ -69,7 +70,8 @@ int main(int argc, char** argv) {
     std::vector<GLuint> textures2;
     pr->GetImages(textures1, textures2);
 
-    auto *quad = new ScreenspaceQuad();
+    auto *quad = new BasicQuad();
+    quad->Init();
 
     //rendering
 
@@ -89,6 +91,7 @@ int main(int argc, char** argv) {
 
     auto *rtdiff = new RenderTexture(RENDER_WIDTH, RENDER_HEIGHT, 1, GL_RGBA);
     auto *rtint = new RenderTexture(RENDER_WIDTH, RENDER_HEIGHT, 1, GL_RGBA);
+
     do{
 
         //run renderer
@@ -143,7 +146,10 @@ int main(int argc, char** argv) {
             rtdiff->Bind();
             glViewport(0,0,RENDER_WIDTH, RENDER_HEIGHT);
             quad->SetImage(textures2[0]);
-            quad->Render(true);
+
+            quad->SetInvert(true);
+            quad->Render();
+            quad->SetInvert(false);
 
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -178,18 +184,18 @@ int main(int argc, char** argv) {
 //    glBindTexture(GL_TEXTURE_2D, 0);
 //    glDeleteTextures(1, &temp);
 
+
+
     delete rtdiff;
     delete rtint;
     delete quad;
     delete light;
     delete dirLight;
     delete pr;
+
     Program::DestroyShaders();
 
-    GLuint err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        fprintf(stderr, "error %x", err);
-    }
+
     std::cout << "exiting" << std::endl;
     return 0;
 }

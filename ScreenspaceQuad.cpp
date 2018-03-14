@@ -23,44 +23,7 @@ static const GLuint indices[] = {
 };
 
 ScreenspaceQuad::ScreenspaceQuad() {
-    program = Program::GetSimpleShader();
-    texUniform = program->GetUniformLocation("image");
-    invertUniform = program->GetUniformLocation("invert");
-    program->Use();
-    glUniform1i(texUniform, 0);
-    glUniform1f(invertUniform, 0.0f);
-    program->Unuse();
 
-    SetupVertexData();
-}
-
-void ScreenspaceQuad::SetImage(GLuint tex) {
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, tex);
-}
-
-void ScreenspaceQuad::Render(bool invert) {
-    program->Use();
-    if (invert) {
-        glUniform1f(invertUniform, 1.0f);
-    } else {
-        glUniform1f(invertUniform, 0.0f);
-    }
-    glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-    program->Unuse();
-}
-
-
-ScreenspaceQuad::~ScreenspaceQuad() {
-    glDeleteBuffers(1, &vbo);
-    glDeleteBuffers(1, &tbo);
-    glDeleteBuffers(1, &ebo);
-    glDeleteVertexArrays(1, &vao);
-}
-
-void ScreenspaceQuad::SetupVertexData() {
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
@@ -84,3 +47,39 @@ void ScreenspaceQuad::SetupVertexData() {
     glBindVertexArray(0);
 }
 
+void ScreenspaceQuad::SetImage(GLuint tex) {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, tex);
+}
+
+void ScreenspaceQuad::Render() {
+    program->Use();
+    glBindVertexArray(vao);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+    program->Unuse();
+}
+
+
+ScreenspaceQuad::~ScreenspaceQuad() {
+    glDeleteBuffers(1, &vbo);
+    glDeleteBuffers(1, &tbo);
+    glDeleteBuffers(1, &ebo);
+    glDeleteVertexArrays(1, &vao);
+}
+
+void ScreenspaceQuad::SetUniforms() {
+    texUniform = program->GetUniformLocation("image");
+    program->Use();
+    glUniform1i(texUniform, 0);
+    program->Unuse();
+}
+
+void ScreenspaceQuad::GetShader() {
+    program = Program::GetSimpleShader();
+}
+
+void ScreenspaceQuad::Init() {
+    GetShader();
+    SetUniforms();
+}
