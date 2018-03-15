@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // We don't want the old OpenGL
 
     GLFWwindow* window;
-    window = glfwCreateWindow( SCREEN_WIDTH, SCREEN_HEIGHT, "Display", NULL, NULL);
+    window = glfwCreateWindow( SCREEN_WIDTH, SCREEN_HEIGHT, "Display", nullptr, nullptr);
     if( window == NULL ){
         fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible.\n" );
         glfwTerminate();
@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_BLEND);
             dilate->SetImage(textures2[0]);
-            dilate->SetRadius(4);
+            dilate->SetRadius(10);
             dilate->Render();
             glDisable(GL_BLEND);
             rtint->Unbind();
