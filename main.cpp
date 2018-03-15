@@ -153,6 +153,8 @@ int main(int argc, char** argv) {
 
 
             //add above shape to original shadow map with synthetic shadow mask removed
+
+            //mask out object's shadow (dilated by some pixels)
             rtdiff->Clear(0,0,0,0);
             rtdiff->Bind();
             glViewport(0,0,RENDER_WIDTH, RENDER_HEIGHT);
@@ -163,11 +165,14 @@ int main(int argc, char** argv) {
             dilate->Render();
             dilate->SetInvert(false);
 
+            //add in real shadow
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_BLEND);
             quad->SetImage(textures1[0]);
             quad->Render();
+            
+            //add in synthetic shadow in masked region
             quad->SetImage(rtint->GetTextureIDs()[0]);
             glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
             quad->Render();
