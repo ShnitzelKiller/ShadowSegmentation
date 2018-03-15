@@ -60,8 +60,10 @@ int main(int argc, char** argv) {
 
     auto *pr = new ParallelSceneRenderer(-6, -6, 6, 6, RENDER_WIDTH, RENDER_HEIGHT, GL_RGBA);
     size_t cubeMeshID = pr->LoadMesh("../../data/cube.obj","../../data/cube_noise.obj");
+    size_t trashMeshID = pr->LoadMesh("../../data/trash_can.obj", "../../data/trash_can_noise.obj");
+    pr->AddInstance(trashMeshID, glm::vec3(0.4, 0.4, 0.4), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/2, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,2,0));
     pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,0,1));
-    pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/4, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(1,1,2));
+    //pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/4, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(1,1,2));
     auto *dirLight = new DirectionalLight(-1, -1, -1);
     auto *light = new PointLight(3, 3, 3);
     pr->AddLight(light);
@@ -171,7 +173,7 @@ int main(int argc, char** argv) {
             glEnable(GL_BLEND);
             quad->SetImage(textures1[0]);
             quad->Render();
-            
+
             //add in synthetic shadow in masked region
             quad->SetImage(rtint->GetTextureIDs()[0]);
             glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
