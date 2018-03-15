@@ -81,14 +81,14 @@ const char* dilateFragShader = R"glsl(
     out vec4 fragColor;
 
     void main() {
-        vec4 col = vec4(0, 0, 0, 0);
+        vec4 col = vec4(1, 1, 1, 1);
         vec2 wh = vec2(width, height);
         int i;
         vec2 disp = vec2(0, 0);
         for (i=-radius; i<=radius; i++) {
             disp[dim] = i;
             vec4 tempcol = texture(image, T + disp/wh);
-            col = max(col, tempcol);
+            col = min(col, tempcol);
         }
         fragColor = invert > 0.5 ? 1.0-col : col;
     }

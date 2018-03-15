@@ -77,8 +77,6 @@ int main(int argc, char** argv) {
 
     auto *dilate = new DilateQuad(RENDER_WIDTH, RENDER_HEIGHT);
     dilate->Init();
-    dilate->SetRadius(10);
-
 
     //rendering
 
@@ -147,8 +145,9 @@ int main(int argc, char** argv) {
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_BLEND);
-            quad->SetImage(textures2[0]);
-            quad->Render();
+            dilate->SetImage(textures2[0]);
+            dilate->SetRadius(4);
+            dilate->Render();
             glDisable(GL_BLEND);
             rtint->Unbind();
 
@@ -160,6 +159,7 @@ int main(int argc, char** argv) {
             dilate->SetImage(textures2[0]);
 
             dilate->SetInvert(true);
+            dilate->SetRadius(5);
             dilate->Render();
             dilate->SetInvert(false);
 
