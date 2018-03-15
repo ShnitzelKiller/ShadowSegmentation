@@ -2,17 +2,14 @@
 // Created by James Noeckel on 3/13/18.
 //
 
-#include <cstdio>
 #include "DilateQuad.h"
-
-
 
 void DilateQuad::GetShader() {
     program = Program::GetDilateShader();
 }
 
 void DilateQuad::SetUniforms() {
-    ScreenspaceQuad::SetUniforms();
+    BasicQuad::SetUniforms();
     radUniform = program->GetUniformLocation("radius");
     dimUniform = program->GetUniformLocation("dim");
     widthUniform = program->GetUniformLocation("width");
@@ -25,11 +22,13 @@ void DilateQuad::SetUniforms() {
 }
 
 void DilateQuad::Render() {
+    //horizontal pass rendered to intermediate buffer
     program->Use();
     glUniform1i(dimUniform, 0);
-
-    GLint drawFBO;
+    GLint drawFBO; //record previous framebuffer
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFBO);
+    bool invert = this->invert;
+    SetInvert(false); //temporarily disable inverting color
     rt.Bind();
     GLint m_viewport[4];
     glGetIntegerv( GL_VIEWPORT, m_viewport );
@@ -37,11 +36,11 @@ void DilateQuad::Render() {
     ScreenspaceQuad::Render();
     glViewport(m_viewport[0], m_viewport[1], m_viewport[2], m_viewport[3]);
 
-    //draw final pass to the original framebuffer
+    //draw vertical pass to the original framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, drawFBO);
     program->Use();
     glUniform1i(dimUniform, 1);
-
+    SetInvert(invert);
     GLuint origTex = textureID;
     SetImage(rt.GetTextureIDs()[0]);
     ScreenspaceQuad::Render();

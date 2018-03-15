@@ -71,17 +71,14 @@ int main(int argc, char** argv) {
     std::vector<GLuint> textures2;
     pr->GetImages(textures1, textures2);
 
+
     auto *quad = new BasicQuad();
     quad->Init();
 
-    auto *dilate = new DilateQuad(fwidth, fheight);
+    auto *dilate = new DilateQuad(RENDER_WIDTH, RENDER_HEIGHT);
     dilate->Init();
     dilate->SetRadius(10);
 
-    GLuint err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        fprintf(stderr, "error %x before loop", err);
-    }
 
     //rendering
 
@@ -115,8 +112,8 @@ int main(int argc, char** argv) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glViewport(0, fheight/2+1, fwidth/2-1, fheight/2-1);
-        dilate->SetImage(textures1[0]);
-        dilate->Render();
+        quad->SetImage(textures1[0]);
+        quad->Render();
 
         glViewport(0, 0, fwidth/2-1, fheight/2-1);
         quad->SetImage(textures1[1]);
@@ -132,6 +129,8 @@ int main(int argc, char** argv) {
 
         //Composite real and fake to remove partial shadow
         {
+
+            //draw intersection of synthetic shadow groups
             pr->SetVisible2(1, false);
             pr->Render2();
 
@@ -148,18 +147,21 @@ int main(int argc, char** argv) {
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_BLEND);
+            quad->SetImage(textures2[0]);
             quad->Render();
             glDisable(GL_BLEND);
             rtint->Unbind();
 
+
+            //add above shape to original shadow map with synthetic shadow mask removed
             rtdiff->Clear(0,0,0,0);
             rtdiff->Bind();
             glViewport(0,0,RENDER_WIDTH, RENDER_HEIGHT);
-            quad->SetImage(textures2[0]);
+            dilate->SetImage(textures2[0]);
 
-            quad->SetInvert(true);
-            quad->Render();
-            quad->SetInvert(false);
+            dilate->SetInvert(true);
+            dilate->Render();
+            dilate->SetInvert(false);
 
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -195,7 +197,6 @@ int main(int argc, char** argv) {
 //    glDeleteTextures(1, &temp);
 
 
-
     delete rtdiff;
     delete rtint;
     delete quad;
@@ -206,7 +207,10 @@ int main(int argc, char** argv) {
 
     Program::DestroyShaders();
 
-
+    GLuint err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        fprintf(stderr, "error %x before loop", err);
+    }
     std::cout << "exiting" << std::endl;
     return 0;
 }

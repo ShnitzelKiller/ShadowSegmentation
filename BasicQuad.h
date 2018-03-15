@@ -15,6 +15,7 @@ private:
 protected:
     void SetUniforms() override;
     GLint invertUniform;
+    bool invert;
 };
 
 

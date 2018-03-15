@@ -8,8 +8,9 @@
 
 #include "ScreenspaceQuad.h"
 #include "gl/RenderTexture.h"
+#include "BasicQuad.h"
 
-class DilateQuad : public ScreenspaceQuad {
+class DilateQuad : public BasicQuad {
 public:
     DilateQuad(int width, int height, int radius=1);
     void Render() override;
