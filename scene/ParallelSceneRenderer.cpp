@@ -33,6 +33,13 @@ size_t ParallelSceneRenderer::AddInstance(size_t meshesID, glm::vec3 scale, glm:
     return id1;
 }
 
+size_t ParallelSceneRenderer::AddInstance(size_t meshesID) {
+    size_t id1 = s1->AddInstance(meshesID);
+    size_t id2 = s2->AddInstance(meshesID);
+    assert(id1 == id2);
+    return id1;
+}
+
 void ParallelSceneRenderer::AddLight(Light *light) {
     s1->AddLight(light);
     s2->AddLight(light);

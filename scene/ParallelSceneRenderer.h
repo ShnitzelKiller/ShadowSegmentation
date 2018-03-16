@@ -16,6 +16,7 @@ public:
     ParallelSceneRenderer(float xmin, float ymin, float xmax, float ymax, int width, int height, GLenum internalformat = GL_RGBA);
     size_t LoadMesh(std::string name1, std::string name2);
     size_t AddInstance(size_t meshesID, glm::vec3 scale, glm::vec3 rotationOrigin, glm::quat rotation, glm::vec3 translation);
+    size_t AddInstance(size_t meshesID);
     void SetTransform(size_t instanceID, glm::vec3 scale, glm::vec3 rotationOrigin, glm::quat rotation, glm::vec3 translation);
     void AddLight(Light *light);
     void SetVisible1(size_t instance, bool vis);

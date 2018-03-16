@@ -58,12 +58,13 @@ int main(int argc, char** argv) {
 
     //build scene
 
-    auto *pr = new ParallelSceneRenderer(-6, -6, 6, 6, RENDER_WIDTH, RENDER_HEIGHT, GL_RGBA);
-    size_t cubeMeshID = pr->LoadMesh("../../data/cube.obj","../../data/cube_noise.obj");
+    auto *pr = new ParallelSceneRenderer(-2, -2, 2, 2, RENDER_WIDTH, RENDER_HEIGHT, GL_RGBA);
+    size_t chairMeshID = pr->LoadMesh("../../data/chair.obj","../../data/chair_noise.obj");
+    size_t tableMeshID = pr->LoadMesh("../../data/table.obj","../../data/table_noise.obj");
 //    size_t trashMeshID = pr->LoadMesh("../../data/trash_can.obj", "../../data/trash_can_noise.obj");
 //    pr->AddInstance(trashMeshID, glm::vec3(0.4, 0.4, 0.4), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/2, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,2,0));
-    pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,0,1));
-    pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/4, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(1,1,2));
+    pr->AddInstance(chairMeshID);
+    pr->AddInstance(tableMeshID);
     auto *dirLight = new DirectionalLight(-1, -1, -1, 0.5f);
     auto *light = new PointLight(3, 3, 3, 0.0f, 2.0f, 0.0f);
     pr->AddLight(light);
