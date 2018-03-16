@@ -9,7 +9,7 @@
 #include <string>
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include "scene/Renderer.h"
+#include "Renderer.h"
 
 class ParallelSceneRenderer {
 public:

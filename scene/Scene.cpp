@@ -8,9 +8,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include "../mathdebug.h"
-#include "../PointLitQuad.h"
-#include "../TextureQuad.h"
-#include "../DirLitQuad.h"
+#include "../overlays/PointLitQuad.h"
+#include "../overlays/TextureQuad.h"
+#include "../overlays/DirLitQuad.h"
 
 
 glm::mat4 DirectionalLight::GetProjectionMatrix(float xmin, float ymin, float xmax, float ymax) {

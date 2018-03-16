@@ -7,7 +7,7 @@
 
 
 #include <GL/glew.h>
-#include "gl/shaders.h"
+#include "../gl/shaders.h"
 
 class ScreenspaceQuad {
 public:

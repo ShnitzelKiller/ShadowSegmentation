@@ -7,7 +7,7 @@
 
 
 #include "ScreenspaceQuad.h"
-#include "gl/RenderTexture.h"
+#include "../gl/RenderTexture.h"
 #include "TextureQuad.h"
 
 class DilateQuad : public TextureQuad {

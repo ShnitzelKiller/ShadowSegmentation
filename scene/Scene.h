@@ -11,7 +11,7 @@
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include "../gl/shaders.h"
-#include "../ScreenspaceQuad.h"
+#include "../overlays/ScreenspaceQuad.h"
 
 struct Mesh {
     std::string name;

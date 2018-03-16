@@ -4,10 +4,10 @@
 #include "scene/Scene.h"
 #include "scene/Renderer.h"
 #include "gl/shaders.h"
-#include "ScreenspaceQuad.h"
-#include "ParallelSceneRenderer.h"
-#include "TextureQuad.h"
-#include "DilateQuad.h"
+#include "overlays/ScreenspaceQuad.h"
+#include "scene/ParallelSceneRenderer.h"
+#include "overlays/TextureQuad.h"
+#include "overlays/DilateQuad.h"
 #include <chrono>
 #include <thread>
 #include <opencv/cv.h>
@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
         quad->SetImage(textures2[1]);
         quad->Render();
 
-        //Composite real and fake to remove partial shadow
+        //Composite real and fake to remove partial shadow (using basic blending & dilation filters)
         {
 
             //draw intersection of synthetic shadow groups
