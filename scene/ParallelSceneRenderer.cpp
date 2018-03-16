@@ -90,3 +90,8 @@ void ParallelSceneRenderer::ReadImageData1(void *buffer, GLenum format, GLenum t
 void ParallelSceneRenderer::ReadImageData2(void *buffer, GLenum format, GLenum type, int index) {
     r2->ReadImageData(buffer, format, type, index);
 }
+
+void ParallelSceneRenderer::GetFinalImages(GLuint *img1, GLuint *img2) {
+    *img1 = r1->GetFinalImageID();
+    *img2 = r2->GetFinalImageID();
+}

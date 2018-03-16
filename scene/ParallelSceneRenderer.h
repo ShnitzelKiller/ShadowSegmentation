@@ -26,6 +26,7 @@ public:
     int GetWidth() const;
     int GetHeight() const;
     void GetImages(std::vector<GLuint> &imgs1, std::vector<GLuint> &imgs2);
+    void GetFinalImages(GLuint *img1, GLuint *img2);
     void ReadImageData1(void *buffer, GLenum format, GLenum type, int index);
     void ReadImageData2(void *buffer, GLenum format, GLenum type, int index);
     ~ParallelSceneRenderer();

@@ -34,13 +34,13 @@ int main(int argc, char** argv) {
 
     GLFWwindow* window;
     window = glfwCreateWindow( SCREEN_WIDTH, SCREEN_HEIGHT, "Display", nullptr, nullptr);
-    if( window == NULL ){
+    if( window == nullptr ){
         fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible.\n" );
         glfwTerminate();
         return -1;
     }
     glfwMakeContextCurrent(window); // Initialize GLEW
-    glewExperimental=true; // Needed in core profile
+    glewExperimental= (GLboolean) true; // Needed in core profile
     if (glewInit() != GLEW_OK) {
         fprintf(stderr, "Failed to initialize GLEW\n");
         return -1;
@@ -64,15 +64,17 @@ int main(int argc, char** argv) {
 //    pr->AddInstance(trashMeshID, glm::vec3(0.4, 0.4, 0.4), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/2, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,2,0));
     pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,0,1));
     pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/4, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(1,1,2));
-    auto *dirLight = new DirectionalLight(-1, -1, -1, 1.0f);
-    auto *light = new PointLight(3, 3, 3, 1.0f, 0.0f, 0.5f);
+    auto *dirLight = new DirectionalLight(-1, -1, -1, 1.1f);
+    auto *light = new PointLight(3, 3, 3, 25.0f, 0.0f, 0.0f);
     pr->AddLight(light);
     pr->AddLight(dirLight);
 
     std::vector<GLuint> textures1;
     std::vector<GLuint> textures2;
+    GLuint finalTexture1;
+    GLuint finalTexture2;
     pr->GetImages(textures1, textures2);
-
+    pr->GetFinalImages(&finalTexture1, &finalTexture2);
 
     auto *quad = new TextureQuad();
     quad->Init();
@@ -107,9 +109,8 @@ int main(int argc, char** argv) {
         light->pos = glm::vec3(2.1*cos(ang), 2.1*sin(ang), 5.2);
         pr->Render();
 
-
         //show results
-        glClearColor(0, 1, 0, 1);
+        glClearColor(1, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glViewport(0, fheight/2+1, fwidth/2-1, fheight/2-1);
@@ -189,6 +190,11 @@ int main(int argc, char** argv) {
             glViewport(fwidth/4, fheight/4, fwidth/2 ,fheight/2);
             quad->SetImage(rtdiff->GetTextureIDs()[0]);
             quad->Render();
+
+//            //display final render
+//            glViewport(fwidth/4, fheight/4, fwidth/2 ,fheight/2);
+//            quad->SetImage(finalTexture1);
+//            quad->Render();
         }
 
 

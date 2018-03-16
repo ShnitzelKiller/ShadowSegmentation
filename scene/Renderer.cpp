@@ -7,7 +7,9 @@
 #include "Renderer.h"
 #include <glm/gtx/transform.hpp>
 
-Renderer::Renderer(Scene *scene, int width, int height, GLenum internalformat) : scene(scene), width(width), height(height), internalformat(internalformat) {
+Renderer::Renderer(Scene *scene, int width, int height, GLenum internalformat) : scene(scene), width(width), height(height), internalformat(internalformat), finalBuffer(width, height, 1, internalformat) {
+    quad.Init();
+
     num_buffers = (int) scene->lights.size();
 
     rendertextures = std::vector<RenderTexture>();
@@ -25,12 +27,12 @@ Renderer::Renderer(Scene *scene, int width, int height, GLenum internalformat) :
 
 void Renderer::Render(bool shading) {
     Update();
+    finalBuffer.Clear(0, 0, 0, 0);
 
     for (size_t i=0; i<num_buffers; i++) {
+        rendertextures[i].Clear(1, 1, 1, 1);
         rendertextures[i].Bind();
         glViewport(0, 0, width, height);
-        glClearColor(1, 1, 1, 1);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (shading) {
             ScreenspaceQuad *surface = scene->GetLitSurface(i);
@@ -65,6 +67,15 @@ void Renderer::Render(bool shading) {
         }
 
         rendertextures[i].Unbind();
+
+        finalBuffer.Bind();
+        quad.SetImage(rendertextures[i].GetTextureIDs()[0]);
+        glEnable(GL_BLEND);
+        glBlendEquation(GL_FUNC_ADD);
+        glBlendFunc(GL_ONE, GL_ONE);
+        quad.Render();
+        glDisable(GL_BLEND);
+        finalBuffer.Unbind();
     }
 }
 
@@ -82,7 +93,7 @@ std::vector<GLuint> Renderer::GetImages() {
 }
 
 void Renderer::Update() {
-    for (size_t i=num_buffers; i<scene->lights.size(); i++) {
+    for (int i=num_buffers; i<scene->lights.size(); i++) {
         RenderTexture rt(width, height, 1, internalformat);
         rendertextures.push_back(std::move(rt));
     }
@@ -101,4 +112,14 @@ void Renderer::ReadImageData(void *buffer, GLenum format, GLenum type, int index
     rendertextures[index].Bind();
     glReadPixels(0, 0, width, height, format, type, buffer);
     rendertextures[index].Unbind();
+}
+
+void Renderer::ReadFinalImageData(void *buffer, GLenum format, GLenum type) {
+    finalBuffer.Bind();
+    glReadPixels(0, 0, width, height, format, type, buffer);
+    finalBuffer.Unbind();
+}
+
+GLuint Renderer::GetFinalImageID() {
+    return finalBuffer.GetTextureIDs()[0];
 }

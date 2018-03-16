@@ -9,6 +9,7 @@
 #include "Scene.h"
 #include "../gl/shaders.h"
 #include "../gl/RenderTexture.h"
+#include "../overlays/TextureQuad.h"
 
 class Renderer {
 public:
@@ -16,13 +17,17 @@ public:
     void Render(bool shading = true);
     ~Renderer();
     std::vector<GLuint> GetImages();
+    GLuint GetFinalImageID();
     int GetWidth() const;
     int GetHeight() const;
     void ReadImageData(void *buffer, GLenum format, GLenum type, int index);
+    void ReadFinalImageData(void *buffer, GLenum format, GLenum type);
 private:
     void Update();
     Scene *scene;
     std::vector<RenderTexture> rendertextures;
+    RenderTexture finalBuffer;
+    TextureQuad quad;
     Program *program;
     GLint mvp_uniform;
     GLint nmw_uniform;

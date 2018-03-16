@@ -75,3 +75,7 @@ void RenderTexture::Clear(float r, float g, float b, float a) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     Unbind();
 }
+
+GLuint RenderTexture::GetID() {
+    return fbo;
+}

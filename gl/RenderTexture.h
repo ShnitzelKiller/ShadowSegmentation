@@ -18,6 +18,7 @@ public:
     void Bind();
     void Unbind();
     void Clear(float r, float g, float b, float a);
+    GLuint GetID();
 private:
     GLuint fbo;
     GLuint *tex;
