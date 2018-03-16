@@ -11,11 +11,15 @@
 class BasicQuad : public ScreenspaceQuad {
 public:
     void SetInvert(bool inv);
+    void SetImage(GLuint tex);
 private:
 protected:
+    void GetUniforms() override;
     void SetUniforms() override;
+    void GetShader() override;
     GLint invertUniform;
     bool invert;
+    GLuint textureID;
 };
 
 

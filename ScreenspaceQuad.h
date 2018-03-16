@@ -12,7 +12,6 @@
 class ScreenspaceQuad {
 public:
     ScreenspaceQuad();
-    void SetImage(GLuint tex);
     virtual void Render();
     virtual ~ScreenspaceQuad();
     void Init();
@@ -24,9 +23,9 @@ private:
 protected:
     Program* program;
     GLint texUniform;
-    virtual void SetUniforms();
-    virtual void GetShader();
-    GLuint textureID;
+    virtual void GetUniforms() = 0;
+    virtual void SetUniforms() = 0;
+    virtual void GetShader() = 0;
 };
 
 

@@ -7,19 +7,27 @@
 
 
 
-void BasicQuad::SetUniforms() {
-    ScreenspaceQuad::SetUniforms();
+void BasicQuad::GetUniforms() {
+    //ScreenspaceQuad::GetUniforms();
+    texUniform = program->GetUniformLocation("image");
     invertUniform = program->GetUniformLocation("invert");
-    program->Use();
-    glUniform1f(invertUniform, 0);
-    program->Unuse();
+}
 
+void BasicQuad::SetImage(GLuint tex) {
+    textureID = tex;
+}
+
+void BasicQuad::GetShader() {
+    program = Program::GetSimpleShader();
 }
 
 void BasicQuad::SetInvert(bool inv) {
-//    std::cout << "setting invert (uniform " << invertUniform << ") to " << inv << std::endl;
     invert = inv;
-    program->Use();
-    glUniform1f(invertUniform, inv ? 1.0f : 0.0f);
-    program->Unuse();
+}
+
+void BasicQuad::SetUniforms() {
+    glUniform1f(invertUniform, invert ? 1.0f : 0.0f);
+    glUniform1i(texUniform, 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureID);
 }

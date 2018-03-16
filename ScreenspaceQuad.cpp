@@ -47,16 +47,9 @@ ScreenspaceQuad::ScreenspaceQuad() {
     glBindVertexArray(0);
 }
 
-void ScreenspaceQuad::SetImage(GLuint tex) {
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, tex);
-    textureID = tex;
-}
-
 void ScreenspaceQuad::Render() {
     program->Use();
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    SetUniforms();
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
@@ -71,18 +64,7 @@ ScreenspaceQuad::~ScreenspaceQuad() {
     glDeleteVertexArrays(1, &vao);
 }
 
-void ScreenspaceQuad::SetUniforms() {
-    texUniform = program->GetUniformLocation("image");
-    program->Use();
-    glUniform1i(texUniform, 0);
-    program->Unuse();
-}
-
-void ScreenspaceQuad::GetShader() {
-    program = Program::GetSimpleShader();
-}
-
 void ScreenspaceQuad::Init() {
     GetShader();
-    SetUniforms();
+    GetUniforms();
 }

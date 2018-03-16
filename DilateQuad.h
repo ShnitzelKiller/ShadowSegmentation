@@ -21,6 +21,7 @@ private:
     RenderTexture rt;
 protected:
     void SetUniforms() override;
+    void GetUniforms() override;
     void GetShader() override;
     GLint dimUniform;
     GLint radUniform;

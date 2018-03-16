@@ -8,17 +8,19 @@ void DilateQuad::GetShader() {
     program = Program::GetDilateShader();
 }
 
-void DilateQuad::SetUniforms() {
-    BasicQuad::SetUniforms();
+void DilateQuad::GetUniforms() {
+    BasicQuad::GetUniforms();
     radUniform = program->GetUniformLocation("radius");
     dimUniform = program->GetUniformLocation("dim");
     widthUniform = program->GetUniformLocation("width");
     heightUniform = program->GetUniformLocation("height");
-    program->Use();
+}
+
+void DilateQuad::SetUniforms() {
+    BasicQuad::SetUniforms();
     glUniform1i(widthUniform, width);
     glUniform1i(heightUniform, height);
     glUniform1i(radUniform, radius);
-    program->Unuse();
 }
 
 void DilateQuad::Render() {
@@ -52,7 +54,5 @@ DilateQuad::DilateQuad(int width, int height, int radius) : width(width), height
 }
 
 void DilateQuad::SetRadius(int rad) {
-    program->Use();
-    glUniform1i(radUniform, rad);
-    program->Unuse();
+    radius = rad;
 }
