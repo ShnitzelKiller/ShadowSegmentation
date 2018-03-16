@@ -5,8 +5,6 @@
 #include <iostream>
 #include "TextureQuad.h"
 
-
-
 void TextureQuad::GetUniforms() {
     //ScreenspaceQuad::GetUniforms();
     texUniform = program->GetUniformLocation("image");

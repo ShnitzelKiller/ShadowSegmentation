@@ -14,8 +14,8 @@
 
 #define SCREEN_WIDTH 500
 #define SCREEN_HEIGHT 500
-#define RENDER_WIDTH 250
-#define RENDER_HEIGHT 250
+#define RENDER_WIDTH 100
+#define RENDER_HEIGHT 100
 
 
 int main(int argc, char** argv) {
@@ -64,8 +64,8 @@ int main(int argc, char** argv) {
 //    pr->AddInstance(trashMeshID, glm::vec3(0.4, 0.4, 0.4), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/2, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,2,0));
     pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,0,1));
     pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/4, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(1,1,2));
-    auto *dirLight = new DirectionalLight(-1, -1, -1, 1.1f);
-    auto *light = new PointLight(3, 3, 3, 25.0f, 0.0f, 0.0f);
+    auto *dirLight = new DirectionalLight(-1, -1, -1, 0.5f);
+    auto *light = new PointLight(3, 3, 3, 0.0f, 2.0f, 0.0f);
     pr->AddLight(light);
     pr->AddLight(dirLight);
 
