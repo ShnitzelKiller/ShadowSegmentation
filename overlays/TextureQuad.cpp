@@ -30,4 +30,5 @@ void TextureQuad::SetUniforms() {
     glUniform1i(texUniform, 0);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);
+    invert = false;
 }

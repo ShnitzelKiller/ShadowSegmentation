@@ -113,20 +113,28 @@ int main(int argc, char** argv) {
         glClearColor(1, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glViewport(0, fheight/2+1, fwidth/2-1, fheight/2-1);
+        glViewport(0, fheight/3*2+1, fwidth/2-1, fheight/3-2);
         quad->SetImage(textures1[0]);
         quad->Render();
 
-        glViewport(0, 0, fwidth/2-1, fheight/2-1);
+        glViewport(0, fheight/3+1, fwidth/2-1, fheight/3-2);
         quad->SetImage(textures1[1]);
         quad->Render();
 
-        glViewport(fwidth/2+1, fheight/2+1, fwidth/2-1, fheight/2-1);
+        glViewport(fwidth/2+1, fheight/3*2+1, fwidth/2-1, fheight/3-2);
         quad->SetImage(textures2[0]);
         quad->Render();
 
-        glViewport(fwidth/2+1, 0, fwidth/2-1, fheight/2-1);
+        glViewport(fwidth/2+1, fheight/3+1, fwidth/2-1, fheight/3-2);
         quad->SetImage(textures2[1]);
+        quad->Render();
+
+        glViewport(0, 1, fwidth/2-1, fheight/3-2);
+        quad->SetImage(finalTexture1);
+        quad->Render();
+
+        glViewport(fwidth/2+1, 1, fwidth/2-1, fheight/3-2);
+        quad->SetImage(finalTexture2);
         quad->Render();
 
         //Composite real and fake to remove partial shadow (using basic blending & dilation filters)
@@ -139,7 +147,7 @@ int main(int argc, char** argv) {
             rtint->Clear(0,0,0,0);
             rtint->Bind();
             glViewport(0,0,RENDER_WIDTH, RENDER_HEIGHT);
-            quad->SetImage(textures2[0]);
+            quad->SetImage(finalTexture2);
             quad->Render();
             rtint->Unbind();
             pr->SetVisible2(1, true);
@@ -149,7 +157,7 @@ int main(int argc, char** argv) {
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_BLEND);
-            dilate->SetImage(textures2[0]);
+            dilate->SetImage(finalTexture2);
             dilate->SetRadius(10);
             dilate->Render();
             glDisable(GL_BLEND);
@@ -162,7 +170,7 @@ int main(int argc, char** argv) {
             rtdiff->Clear(0,0,0,0);
             rtdiff->Bind();
             glViewport(0,0,RENDER_WIDTH, RENDER_HEIGHT);
-            dilate->SetImage(textures2[0]);
+            dilate->SetImage(finalTexture2);
 
             dilate->SetInvert(true);
             dilate->SetRadius(5);
@@ -173,7 +181,7 @@ int main(int argc, char** argv) {
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_BLEND);
-            quad->SetImage(textures1[0]);
+            quad->SetImage(finalTexture1);
             quad->Render();
 
             //add in synthetic shadow in masked region
@@ -223,7 +231,7 @@ int main(int argc, char** argv) {
 
     GLuint err;
     while ((err = glGetError()) != GL_NO_ERROR) {
-        fprintf(stderr, "error %x in framebuffer", err);
+        fprintf(stderr, "error %x\n", err);
     }
 
     std::cout << "exiting" << std::endl;
