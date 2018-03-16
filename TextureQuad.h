@@ -8,7 +8,7 @@
 
 #include "ScreenspaceQuad.h"
 
-class BasicQuad : public ScreenspaceQuad {
+class TextureQuad : public ScreenspaceQuad {
 public:
     void SetInvert(bool inv);
     void SetImage(GLuint tex);

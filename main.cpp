@@ -6,7 +6,7 @@
 #include "gl/shaders.h"
 #include "ScreenspaceQuad.h"
 #include "ParallelSceneRenderer.h"
-#include "BasicQuad.h"
+#include "TextureQuad.h"
 #include "DilateQuad.h"
 #include <chrono>
 #include <thread>
@@ -60,12 +60,12 @@ int main(int argc, char** argv) {
 
     auto *pr = new ParallelSceneRenderer(-6, -6, 6, 6, RENDER_WIDTH, RENDER_HEIGHT, GL_RGBA);
     size_t cubeMeshID = pr->LoadMesh("../../data/cube.obj","../../data/cube_noise.obj");
-    size_t trashMeshID = pr->LoadMesh("../../data/trash_can.obj", "../../data/trash_can_noise.obj");
-    pr->AddInstance(trashMeshID, glm::vec3(0.4, 0.4, 0.4), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/2, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,2,0));
+//    size_t trashMeshID = pr->LoadMesh("../../data/trash_can.obj", "../../data/trash_can_noise.obj");
+//    pr->AddInstance(trashMeshID, glm::vec3(0.4, 0.4, 0.4), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/2, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,2,0));
     pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis(0.f, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,0,1));
-    //pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/4, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(1,1,2));
-    auto *dirLight = new DirectionalLight(-1, -1, -1);
-    auto *light = new PointLight(3, 3, 3);
+    pr->AddInstance(cubeMeshID, glm::vec3(1, 1, 1), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/4, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(1,1,2));
+    auto *dirLight = new DirectionalLight(-1, -1, -1, 1.0f);
+    auto *light = new PointLight(3, 3, 3, 1.0f, 0.0f, 0.5f);
     pr->AddLight(light);
     pr->AddLight(dirLight);
 
@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
     pr->GetImages(textures1, textures2);
 
 
-    auto *quad = new BasicQuad();
+    auto *quad = new TextureQuad();
     quad->Init();
 
     auto *dilate = new DilateQuad(RENDER_WIDTH, RENDER_HEIGHT);
@@ -107,6 +107,7 @@ int main(int argc, char** argv) {
         light->pos = glm::vec3(2.1*cos(ang), 2.1*sin(ang), 5.2);
         pr->Render();
 
+
         //show results
         glClearColor(0, 1, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -132,7 +133,7 @@ int main(int argc, char** argv) {
 
             //draw intersection of synthetic shadow groups
             pr->SetVisible2(1, false);
-            pr->Render2();
+            pr->Render(false);
 
             rtint->Clear(0,0,0,0);
             rtint->Bind();
@@ -142,7 +143,7 @@ int main(int argc, char** argv) {
             rtint->Unbind();
             pr->SetVisible2(1, true);
             pr->SetVisible2(0, false);
-            pr->Render2();
+            pr->Render2(false);
             rtint->Bind();
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -182,7 +183,7 @@ int main(int argc, char** argv) {
             glDisable(GL_BLEND);
 
             pr->SetVisible2(0, true);
-            pr->Render2();
+            pr->Render2(true);
 
             //display processed image as a test
             glViewport(fwidth/4, fheight/4, fwidth/2 ,fheight/2);
@@ -216,8 +217,9 @@ int main(int argc, char** argv) {
 
     GLuint err;
     while ((err = glGetError()) != GL_NO_ERROR) {
-        fprintf(stderr, "error %x before loop", err);
+        fprintf(stderr, "error %x in framebuffer", err);
     }
+
     std::cout << "exiting" << std::endl;
     return 0;
 }

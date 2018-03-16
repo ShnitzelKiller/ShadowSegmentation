@@ -3,29 +3,29 @@
 //
 
 #include <iostream>
-#include "BasicQuad.h"
+#include "TextureQuad.h"
 
 
 
-void BasicQuad::GetUniforms() {
+void TextureQuad::GetUniforms() {
     //ScreenspaceQuad::GetUniforms();
     texUniform = program->GetUniformLocation("image");
     invertUniform = program->GetUniformLocation("invert");
 }
 
-void BasicQuad::SetImage(GLuint tex) {
+void TextureQuad::SetImage(GLuint tex) {
     textureID = tex;
 }
 
-void BasicQuad::GetShader() {
+void TextureQuad::GetShader() {
     program = Program::GetSimpleShader();
 }
 
-void BasicQuad::SetInvert(bool inv) {
+void TextureQuad::SetInvert(bool inv) {
     invert = inv;
 }
 
-void BasicQuad::SetUniforms() {
+void TextureQuad::SetUniforms() {
     glUniform1f(invertUniform, invert ? 1.0f : 0.0f);
     glUniform1i(texUniform, 0);
     glActiveTexture(GL_TEXTURE0);

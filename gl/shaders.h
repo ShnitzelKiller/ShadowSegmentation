@@ -14,6 +14,10 @@ extern const char* simpleVertexShader;
 
 extern const char* simpleFragShader;
 
+extern const char* dilateFragShader;
+
+extern const char* pointLitFragShader;
+
 class Program {
 public:
     Program();
@@ -31,6 +35,8 @@ public:
     static Program *GetDefaultShader();
     static Program *GetSimpleShader();
     static Program *GetDilateShader();
+    static Program *GetPointLitShader();
+    static Program *GetDirLitShader();
     static void DestroyShaders();
 private:
     void DeleteShaders();
@@ -40,6 +46,8 @@ private:
     static Program *defaultShader;
     static Program *simpleShader;
     static Program *dilateShader;
+    static Program *pointLitShader;
+    static Program *dirLitShader;
 };
 
 #endif //RENDERER_SHADERS_H

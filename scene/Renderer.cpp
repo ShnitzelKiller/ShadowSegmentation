@@ -23,9 +23,8 @@ Renderer::Renderer(Scene *scene, int width, int height, GLenum internalformat) :
     nmw_uniform = program->GetUniformLocation("nmw");
 }
 
-void Renderer::Render() {
+void Renderer::Render(bool shading) {
     Update();
-    program->Use();
 
     for (size_t i=0; i<num_buffers; i++) {
         rendertextures[i].Bind();
@@ -33,10 +32,16 @@ void Renderer::Render() {
         glClearColor(1, 1, 1, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        if (shading) {
+            ScreenspaceQuad *surface = scene->GetLitSurface(i);
+            surface->Render();
+        }
+
         glm::mat4 VP = scene->GetProjectionMatrix(i);
 
         for (auto it = scene->instances.begin(); it != scene->instances.end(); it++) {
             if (!it->active) continue;
+            program->Use();
             Mesh m = scene->meshes[it->meshID];
             //std::cout << "drawing instance " << m.name << " (" << m.IndexCount << " indices)" << std::endl;
             glm::mat4 MW;
@@ -56,11 +61,11 @@ void Renderer::Render() {
             glBindVertexArray(m.MeshVAO);
             glDrawElements(GL_TRIANGLES, m.IndexCount, GL_UNSIGNED_INT, (void*) 0);
             glBindVertexArray(0);
+            program->Unuse();
         }
 
         rendertextures[i].Unbind();
     }
-    program->Unuse();
 }
 
 Renderer::~Renderer() = default;

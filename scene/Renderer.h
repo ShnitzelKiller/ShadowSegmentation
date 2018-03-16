@@ -13,7 +13,7 @@
 class Renderer {
 public:
     Renderer(Scene *scene, int width, int height, GLenum internalformat = GL_RGBA);
-    void Render();
+    void Render(bool shading = true);
     ~Renderer();
     std::vector<GLuint> GetImages();
     int GetWidth() const;

@@ -12,6 +12,7 @@
 class ScreenspaceQuad {
 public:
     ScreenspaceQuad();
+    ScreenspaceQuad(ScreenspaceQuad &&other) noexcept;
     virtual void Render();
     virtual ~ScreenspaceQuad();
     void Init();

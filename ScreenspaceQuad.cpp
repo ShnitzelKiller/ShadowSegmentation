@@ -2,6 +2,7 @@
 // Created by James Noeckel on 3/6/18.
 //
 
+#include <cstdio>
 #include "ScreenspaceQuad.h"
 
 static const float verts[] =
@@ -67,4 +68,11 @@ ScreenspaceQuad::~ScreenspaceQuad() {
 void ScreenspaceQuad::Init() {
     GetShader();
     GetUniforms();
+}
+
+ScreenspaceQuad::ScreenspaceQuad(ScreenspaceQuad &&other) noexcept : vbo(other.vbo), tbo(other.tbo), ebo(other.ebo), vao(other.vao) {
+    other.vbo = 0;
+    other.tbo = 0;
+    other.ebo = 0;
+    other.vao = 0;
 }

@@ -45,17 +45,17 @@ ParallelSceneRenderer::SetTransform(size_t instanceID, glm::vec3 scale, glm::vec
     s2->SetTransform(instanceID, scale, rotationOrigin, rotation, translation);
 }
 
-void ParallelSceneRenderer::Render1() {
-    r1->Render();
+void ParallelSceneRenderer::Render1(bool shading) {
+    r1->Render(shading);
 }
 
-void ParallelSceneRenderer::Render2() {
-    r2->Render();
+void ParallelSceneRenderer::Render2(bool shading) {
+    r2->Render(shading);
 }
 
-void ParallelSceneRenderer::Render() {
-    r1->Render();
-    r2->Render();
+void ParallelSceneRenderer::Render(bool shading) {
+    r1->Render(shading);
+    r2->Render(shading);
 }
 
 void ParallelSceneRenderer::GetImages(std::vector<GLuint> &imgs1, std::vector<GLuint> &imgs2) {

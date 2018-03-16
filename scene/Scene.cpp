@@ -8,6 +8,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include "../mathdebug.h"
+#include "../PointLitQuad.h"
+#include "../TextureQuad.h"
+#include "../DirLitQuad.h"
 
 
 glm::mat4 DirectionalLight::GetProjectionMatrix(float xmin, float ymin, float xmax, float ymax) {
@@ -23,6 +26,17 @@ glm::mat4 DirectionalLight::GetProjectionMatrix(float xmin, float ymin, float xm
     return proj * shear;
 }
 
+ScreenspaceQuad *DirectionalLight::GetLitQuad(float xmin, float ymin, float xmax, float ymax) {
+    if (!surface) {
+        auto *quad = new DirLitQuad();
+        quad->Init();
+        surface = quad;
+    }
+    ((DirLitQuad*)surface)->SetDir(dir.x, dir.y, dir.z);
+    ((DirLitQuad*)surface)->SetIntensity(intensity);
+    return surface;
+}
+
 glm::mat4 PointLight::GetProjectionMatrix(float xmin, float ymin, float xmax, float ymax) {
     glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
     glm::mat4 proj = glm::ortho(xmin, xmax, ymin, ymax, 0.f, -10.f);
@@ -35,6 +49,18 @@ glm::mat4 PointLight::GetProjectionMatrix(float xmin, float ymin, float xmax, fl
     shear[2][0] = -shearX;
     shear[2][1] = -shearY;
     return proj * shear;
+}
+
+ScreenspaceQuad *PointLight::GetLitQuad(float xmin, float ymin, float xmax, float ymax) {
+    if (!surface) {
+        auto *quad = new PointLitQuad();
+        quad->Init();
+        surface = quad;
+    }
+    ((PointLitQuad*)surface)->SetBounds(xmin, ymin, xmax, ymax);
+    ((PointLitQuad*)surface)->SetIntensity(intensity.z, intensity.y, intensity.x);
+    ((PointLitQuad*)surface)->SetLightPos(pos.x, pos.y, pos.z);
+    return surface;
 }
 
 
@@ -266,4 +292,8 @@ glm::mat4 Scene::GetProjectionMatrix(size_t i) {
 
 void Scene::SetVisible(size_t instanceID, bool visible) {
     instances[instanceID].active = visible;
+}
+
+ScreenspaceQuad *Scene::GetLitSurface(size_t i) {
+    return lights[i]->GetLitQuad(xmin, ymin, xmax, ymax);
 }

@@ -10,6 +10,8 @@
 #include <GL/glew.h>
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include "../gl/shaders.h"
+#include "../ScreenspaceQuad.h"
 
 struct Mesh {
     std::string name;
@@ -26,20 +28,33 @@ struct Mesh {
 };
 
 struct Light {
+    Light() : surface(nullptr) {}
     virtual glm::mat4 GetProjectionMatrix(float xmin, float ymin, float xmax, float ymax) = 0;
-    virtual ~Light() = default;
+    virtual ScreenspaceQuad *GetLitQuad(float xmin, float ymin, float xmax, float ymax) = 0;
+    virtual ~Light() {
+        if (surface != nullptr) {
+            delete surface;
+        }
+    }
+
+protected:
+    ScreenspaceQuad *surface;
 };
 
 struct DirectionalLight : Light {
-    DirectionalLight(float dx, float dy, float dz) : dir(glm::vec3(dx, dy, dz)) {}
+    DirectionalLight(float dx, float dy, float dz, float intensity = 1.0f) : dir(glm::vec3(dx, dy, dz)), intensity(intensity) {}
     glm::mat4 GetProjectionMatrix(float xmin, float ymin, float xmax, float ymax) override;
+    ScreenspaceQuad *GetLitQuad(float xmin, float ymin, float xmax, float ymax) override;
     glm::vec3 dir;
+    float intensity;
 };
 
 struct PointLight : Light {
-    PointLight(float px, float py, float pz) : pos(glm::vec3(px, py, pz)) {}
+    PointLight(float px, float py, float pz, float intensity_quadratic = 1.0f, float intensity_linear = 0.0f, float intensity_const = 0.0f) : pos(glm::vec3(px, py, pz)), intensity(glm::vec3(intensity_const, intensity_linear, intensity_quadratic)) {}
     glm::mat4 GetProjectionMatrix(float xmin, float ymin, float xmax, float ymax) override;
+    ScreenspaceQuad *GetLitQuad(float xmin, float ymin, float xmax, float ymax) override;
     glm::vec3 pos;
+    glm::vec3 intensity; //0: constant, 1: linear, 2: quadratic
 };
 
 struct Instance {
@@ -68,6 +83,7 @@ public:
     //void AddDirectionalLight(glm::vec3 dir);
     void AddLight(Light *light);
     glm::mat4 GetProjectionMatrix(size_t i);
+    ScreenspaceQuad* GetLitSurface(size_t i);
 
     size_t LoadMesh(const std::string &filename);
     size_t AddTri(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3);

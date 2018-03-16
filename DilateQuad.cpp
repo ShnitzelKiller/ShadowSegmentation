@@ -9,7 +9,7 @@ void DilateQuad::GetShader() {
 }
 
 void DilateQuad::GetUniforms() {
-    BasicQuad::GetUniforms();
+    TextureQuad::GetUniforms();
     radUniform = program->GetUniformLocation("radius");
     dimUniform = program->GetUniformLocation("dim");
     widthUniform = program->GetUniformLocation("width");
@@ -17,7 +17,7 @@ void DilateQuad::GetUniforms() {
 }
 
 void DilateQuad::SetUniforms() {
-    BasicQuad::SetUniforms();
+    TextureQuad::SetUniforms();
     glUniform1i(widthUniform, width);
     glUniform1i(heightUniform, height);
     glUniform1i(radUniform, radius);

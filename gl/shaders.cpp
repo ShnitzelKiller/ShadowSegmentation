@@ -94,6 +94,35 @@ const char* dilateFragShader = R"glsl(
     }
 )glsl";
 
+const char* pointLitFragShader = R"glsl(
+    #version 330 core
+    uniform vec3 pos;
+    uniform vec3 intensity;
+    uniform vec4 bounds;
+    in vec2 T;
+    out vec4 fragColor;
+    void main() {
+        vec3 o = vec3(T * (bounds.zw - bounds.xy) + bounds.xy, 0);
+        vec3 l = pos - o;
+        float invdist = 1.0/length(l);
+        float fac = l.z * invdist;
+        float finalfac = fac * dot(intensity, vec3(1.0, invdist, invdist*invdist));
+        fragColor = vec4(finalfac, finalfac, finalfac, 1.0);
+    }
+)glsl";
+
+const char* dirLitFragShader = R"glsl(
+    #version 330 core
+    uniform vec3 dir;
+    uniform float intensity;
+    in vec2 T;
+    out vec4 fragColor;
+    void main() {
+        vec3 col = vec3(-intensity * dir.z / length(dir));
+        fragColor = vec4(col, 1.0);
+    }
+)glsl";
+
 Program::Program() : vshader_(0), fshader_(0) {
     program_ = glCreateProgram();
 }
@@ -198,6 +227,8 @@ Program::Program(Program &&other) noexcept : program_(other.program_), vshader_(
 Program *Program::defaultShader = nullptr;
 Program *Program::simpleShader = nullptr;
 Program *Program::dilateShader = nullptr;
+Program *Program::pointLitShader = nullptr;
+Program *Program::dirLitShader = nullptr;
 
 Program *Program::GetDefaultShader() {
     if (!defaultShader) {
@@ -226,6 +257,24 @@ Program *Program::GetDilateShader() {
     return dilateShader;
 }
 
+Program *Program::GetPointLitShader() {
+    if (!pointLitShader) {
+        pointLitShader = new Program();
+        pointLitShader->AttachShaders(simpleVertexShader, pointLitFragShader);
+        pointLitShader->Link();
+    }
+    return pointLitShader;
+}
+
+Program *Program::GetDirLitShader() {
+    if (!dirLitShader) {
+        dirLitShader = new Program();
+        dirLitShader->AttachShaders(simpleVertexShader, dirLitFragShader);
+        dirLitShader->Link();
+    }
+    return dirLitShader;
+}
+
 void Program::DestroyShaders() {
     if (defaultShader) {
         delete defaultShader;
@@ -238,6 +287,14 @@ void Program::DestroyShaders() {
     if (dilateShader) {
         delete dilateShader;
         dilateShader = nullptr;
+    }
+    if (pointLitShader) {
+        delete pointLitShader;
+        pointLitShader = nullptr;
+    }
+    if (dirLitShader) {
+        delete dirLitShader;
+        dirLitShader = nullptr;
     }
 }
 

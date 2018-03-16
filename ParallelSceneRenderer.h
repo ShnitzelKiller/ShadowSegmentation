@@ -20,9 +20,9 @@ public:
     void AddLight(Light *light);
     void SetVisible1(size_t instance, bool vis);
     void SetVisible2(size_t instance, bool vis);
-    void Render();
-    void Render1();
-    void Render2();
+    void Render(bool shading = true);
+    void Render1(bool shading = true);
+    void Render2(bool shading = true);
     int GetWidth() const;
     int GetHeight() const;
     void GetImages(std::vector<GLuint> &imgs1, std::vector<GLuint> &imgs2);
