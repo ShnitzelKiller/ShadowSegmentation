@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
         ang += 0.02f;
         dirLight->dir = glm::vec3(-cos(ang), -sin(ang), -1);
         light->pos = glm::vec3(2.1*cos(ang), 2.1*sin(ang), 5.2);
-        pr->Render();
+        pr->Render(false);
 
         //show results
         glClearColor(1, 0, 0, 1);
@@ -148,7 +148,7 @@ int main(int argc, char** argv) {
             rtint->Clear(0,0,0,0);
             rtint->Bind();
             glViewport(0,0,RENDER_WIDTH, RENDER_HEIGHT);
-            quad->SetImage(finalTexture2);
+            quad->SetImage(textures2[0]);
             quad->Render();
             rtint->Unbind();
             pr->SetVisible2(1, true);
@@ -158,7 +158,7 @@ int main(int argc, char** argv) {
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_BLEND);
-            dilate->SetImage(finalTexture2);
+            dilate->SetImage(textures2[0]);
             dilate->SetRadius(10);
             dilate->Render();
             glDisable(GL_BLEND);
@@ -171,7 +171,7 @@ int main(int argc, char** argv) {
             rtdiff->Clear(0,0,0,0);
             rtdiff->Bind();
             glViewport(0,0,RENDER_WIDTH, RENDER_HEIGHT);
-            dilate->SetImage(finalTexture2);
+            dilate->SetImage(textures1[0]);
 
             dilate->SetInvert(true);
             dilate->SetRadius(5);
@@ -182,7 +182,7 @@ int main(int argc, char** argv) {
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_BLEND);
-            quad->SetImage(finalTexture1);
+            quad->SetImage(textures1[0]);
             quad->Render();
 
             //add in synthetic shadow in masked region
@@ -197,7 +197,7 @@ int main(int argc, char** argv) {
 
             //display processed image as a test
             glViewport(fwidth/4, fheight/4, fwidth/2 ,fheight/2);
-            quad->SetImage(rtdiff->GetTextureIDs()[0]);
+            quad->SetImage(rtint->GetTextureIDs()[0]);
             quad->Render();
 
 //            //display final render
@@ -227,8 +227,6 @@ int main(int argc, char** argv) {
     delete light;
     delete dirLight;
     delete pr;
-
-    Program::DestroyShaders();
 
     GLuint err;
     while ((err = glGetError()) != GL_NO_ERROR) {

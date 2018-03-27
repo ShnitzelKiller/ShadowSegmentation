@@ -224,78 +224,55 @@ Program::Program(Program &&other) noexcept : program_(other.program_), vshader_(
 
 //static stuff
 
-Program *Program::defaultShader = nullptr;
-Program *Program::simpleShader = nullptr;
-Program *Program::dilateShader = nullptr;
-Program *Program::pointLitShader = nullptr;
-Program *Program::dirLitShader = nullptr;
+std::shared_ptr<Program> Program::defaultShader = std::shared_ptr<Program>(nullptr);
+std::shared_ptr<Program> Program::simpleShader = std::shared_ptr<Program>(nullptr);
+std::shared_ptr<Program> Program::dilateShader = std::shared_ptr<Program>(nullptr);
+std::shared_ptr<Program> Program::pointLitShader = std::shared_ptr<Program>(nullptr);
+std::shared_ptr<Program> Program::dirLitShader = std::shared_ptr<Program>(nullptr);
 
-Program *Program::GetDefaultShader() {
+std::shared_ptr<Program> Program::GetDefaultShader() {
     if (!defaultShader) {
-        defaultShader = new Program();
+        defaultShader = std::make_shared<Program>();
         defaultShader->AttachShaders(vertexSource, fragSource);
         defaultShader->Link();
     }
     return defaultShader;
 }
 
-Program *Program::GetSimpleShader() {
+std::shared_ptr<Program> Program::GetSimpleShader() {
     if (!simpleShader) {
-        simpleShader = new Program();
+        simpleShader = std::make_shared<Program>();
         simpleShader->AttachShaders(simpleVertexShader, simpleFragShader);
         simpleShader->Link();
     }
     return simpleShader;
 }
 
-Program *Program::GetDilateShader() {
+std::shared_ptr<Program> Program::GetDilateShader() {
     if (!dilateShader) {
-        dilateShader = new Program();
+        dilateShader = std::make_shared<Program>();
         dilateShader->AttachShaders(simpleVertexShader, dilateFragShader);
         dilateShader->Link();
     }
     return dilateShader;
 }
 
-Program *Program::GetPointLitShader() {
+std::shared_ptr<Program> Program::GetPointLitShader() {
     if (!pointLitShader) {
-        pointLitShader = new Program();
+        pointLitShader = std::make_shared<Program>();
         pointLitShader->AttachShaders(simpleVertexShader, pointLitFragShader);
         pointLitShader->Link();
     }
     return pointLitShader;
 }
 
-Program *Program::GetDirLitShader() {
+std::shared_ptr<Program> Program::GetDirLitShader() {
     if (!dirLitShader) {
-        dirLitShader = new Program();
+        dirLitShader = std::make_shared<Program>();
         dirLitShader->AttachShaders(simpleVertexShader, dirLitFragShader);
         dirLitShader->Link();
     }
     return dirLitShader;
-}
-
-void Program::DestroyShaders() {
-    if (defaultShader) {
-        delete defaultShader;
-        defaultShader = nullptr;
-    }
-    if (simpleShader) {
-        delete simpleShader;
-        simpleShader = nullptr;
-    }
-    if (dilateShader) {
-        delete dilateShader;
-        dilateShader = nullptr;
-    }
-    if (pointLitShader) {
-        delete pointLitShader;
-        pointLitShader = nullptr;
-    }
-    if (dirLitShader) {
-        delete dirLitShader;
-        dirLitShader = nullptr;
-    }
 }
 
 

@@ -28,7 +28,7 @@ private:
     std::vector<RenderTexture> rendertextures;
     RenderTexture finalBuffer;
     TextureQuad quad;
-    Program *program;
+    std::shared_ptr<Program> program;
     GLint mvp_uniform;
     GLint nmw_uniform;
     int width;

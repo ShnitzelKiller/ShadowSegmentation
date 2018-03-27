@@ -22,7 +22,7 @@ private:
     GLuint tbo;
     GLuint ebo;
 protected:
-    Program* program;
+    std::shared_ptr<Program> program;
     GLint texUniform;
     virtual void GetUniforms() = 0;
     virtual void SetUniforms() = 0;
