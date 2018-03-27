@@ -4,7 +4,7 @@
 
 #include "RenderContext.h"
 
-RenderContext::RenderContext(Program *p) {
+RenderContext::RenderContext(std::shared_ptr<Program> p) {
     this->p = p;
 }
 

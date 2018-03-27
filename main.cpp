@@ -58,40 +58,41 @@ int main(int argc, char** argv) {
 
     //build scene
 
-    auto *pr = new ParallelSceneRenderer(-2, -2, 2, 2, RENDER_WIDTH, RENDER_HEIGHT, GL_RGBA);
-    size_t chairMeshID = pr->LoadMesh("../../data/chair.obj","../../data/chair_noise.obj");
-    size_t tableMeshID = pr->LoadMesh("../../data/table.obj","../../data/table_noise.obj");
+    {
+        ParallelSceneRenderer pr(-2, -2, 2, 2, RENDER_WIDTH, RENDER_HEIGHT, GL_RGBA);
+        size_t chairMeshID = pr.LoadMesh("../../data/chair.obj", "../../data/chair_noise.obj");
+        size_t tableMeshID = pr.LoadMesh("../../data/table.obj", "../../data/table_noise.obj");
 //    size_t trashMeshID = pr->LoadMesh("../../data/trash_can.obj", "../../data/trash_can_noise.obj");
 //    pr->AddInstance(trashMeshID, glm::vec3(0.4, 0.4, 0.4), glm::vec3(0,0,0), glm::angleAxis((float) M_PI/2, glm::vec3(1.f, 0.f, 0.f)), glm::vec3(0,2,0));
-    pr->AddInstance(chairMeshID);
-    pr->AddInstance(tableMeshID);
-    auto *dirLight = new DirectionalLight(-1, -1, -1, 0.5f);
-    auto *light = new PointLight(3, 3, 3, 0.0f, 2.0f, 0.0f);
-    pr->AddLight(light);
-    pr->AddLight(dirLight);
+        pr.AddInstance(chairMeshID);
+        pr.AddInstance(tableMeshID);
+        DirectionalLight dirLight(-1, -1, -1, 0.5f);
+        PointLight light(3, 3, 3, 0.0f, 2.0f, 0.0f);
+        pr.AddLight(&light);
+        pr.AddLight(&dirLight);
 
-    std::vector<GLuint> textures1;
-    std::vector<GLuint> textures2;
-    GLuint finalTexture1;
-    GLuint finalTexture2;
-    pr->GetImages(textures1, textures2);
-    pr->GetFinalImages(&finalTexture1, &finalTexture2);
+        std::vector<GLuint> textures1;
+        std::vector<GLuint> textures2;
+        GLuint finalTexture1;
+        GLuint finalTexture2;
+        pr.GetImages(textures1, textures2);
+        pr.GetFinalImages(&finalTexture1, &finalTexture2);
 
-    auto *quad = new TextureQuad();
-    quad->Init();
+        TextureQuad quad;
+        quad.Init();
 
-    auto *dilate = new DilateQuad(RENDER_WIDTH, RENDER_HEIGHT);
-    dilate->Init();
+        DilateQuad dilate(RENDER_WIDTH, RENDER_HEIGHT);
+        dilate.Init();
 
-    //rendering
+        //rendering
 
-    float ang = 0;
+        float ang = 0;
 
-    std::cout << "render loop" << std::endl;
-    glCullFace(GL_BACK);
-    glEnable(GL_CULL_FACE);
+        std::cout << "render loop" << std::endl;
+        glCullFace(GL_BACK);
+        glEnable(GL_CULL_FACE);
 
-    //initialize test image
+        //initialize test image
 //    GLuint temp;
 //    glGenTextures(1, &temp);
 //    glBindTexture(GL_TEXTURE_2D, temp);
@@ -99,135 +100,127 @@ int main(int argc, char** argv) {
 //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    auto *rtdiff = new RenderTexture(RENDER_WIDTH, RENDER_HEIGHT, 1, GL_RGBA);
-    auto *rtint = new RenderTexture(RENDER_WIDTH, RENDER_HEIGHT, 1, GL_RGBA);
+        RenderTexture rtdiff(RENDER_WIDTH, RENDER_HEIGHT, 1, GL_RGBA);
+        RenderTexture rtint(RENDER_WIDTH, RENDER_HEIGHT, 1, GL_RGBA);
 
-    do{
+        do {
 
-        //run renderer
-        ang += 0.02f;
-        dirLight->dir = glm::vec3(-cos(ang), -sin(ang), -1);
-        light->pos = glm::vec3(2.1*cos(ang), 2.1*sin(ang), 5.2);
-        pr->Render(false);
+            //run renderer
+            ang += 0.02f;
+            dirLight.dir = glm::vec3(-cos(ang), -sin(ang), -1);
+            light.pos = glm::vec3(2.1 * cos(ang), 2.1 * sin(ang), 5.2);
+            pr.Render(false);
 
-        //show results
-        glClearColor(1, 0, 0, 1);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            //show results
+            glClearColor(1, 0, 0, 1);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glViewport(0, fheight/3*2+1, fwidth/2-1, fheight/3-2);
-        quad->SetImage(textures1[0]);
-        quad->Render();
+            glViewport(0, fheight / 3 * 2 + 1, fwidth / 2 - 1, fheight / 3 - 2);
+            quad.SetImage(textures1[0]);
+            quad.Render();
 
-        glViewport(0, fheight/3+1, fwidth/2-1, fheight/3-2);
-        quad->SetImage(textures1[1]);
-        quad->Render();
+            glViewport(0, fheight / 3 + 1, fwidth / 2 - 1, fheight / 3 - 2);
+            quad.SetImage(textures1[1]);
+            quad.Render();
 
-        glViewport(fwidth/2+1, fheight/3*2+1, fwidth/2-1, fheight/3-2);
-        quad->SetImage(textures2[0]);
-        quad->Render();
+            glViewport(fwidth / 2 + 1, fheight / 3 * 2 + 1, fwidth / 2 - 1, fheight / 3 - 2);
+            quad.SetImage(textures2[0]);
+            quad.Render();
 
-        glViewport(fwidth/2+1, fheight/3+1, fwidth/2-1, fheight/3-2);
-        quad->SetImage(textures2[1]);
-        quad->Render();
+            glViewport(fwidth / 2 + 1, fheight / 3 + 1, fwidth / 2 - 1, fheight / 3 - 2);
+            quad.SetImage(textures2[1]);
+            quad.Render();
 
-        glViewport(0, 1, fwidth/2-1, fheight/3-2);
-        quad->SetImage(finalTexture1);
-        quad->Render();
+            glViewport(0, 1, fwidth / 2 - 1, fheight / 3 - 2);
+            quad.SetImage(finalTexture1);
+            quad.Render();
 
-        glViewport(fwidth/2+1, 1, fwidth/2-1, fheight/3-2);
-        quad->SetImage(finalTexture2);
-        quad->Render();
+            glViewport(fwidth / 2 + 1, 1, fwidth / 2 - 1, fheight / 3 - 2);
+            quad.SetImage(finalTexture2);
+            quad.Render();
 
-        //Composite real and fake to remove partial shadow (using basic blending & dilation filters)
-        {
+            //Composite real and fake to remove partial shadow (using basic blending & dilation filters)
+            {
 
-            //draw intersection of synthetic shadow groups
-            pr->SetVisible2(1, false);
-            pr->Render(false);
+                //draw intersection of synthetic shadow groups
+                pr.SetVisible2(1, false);
+                pr.Render(false);
 
-            rtint->Clear(0,0,0,0);
-            rtint->Bind();
-            glViewport(0,0,RENDER_WIDTH, RENDER_HEIGHT);
-            quad->SetImage(textures2[0]);
-            quad->Render();
-            rtint->Unbind();
-            pr->SetVisible2(1, true);
-            pr->SetVisible2(0, false);
-            pr->Render2(false);
-            rtint->Bind();
-            glBlendEquation(GL_FUNC_ADD);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glEnable(GL_BLEND);
-            dilate->SetImage(textures2[0]);
-            dilate->SetRadius(10);
-            dilate->Render();
-            glDisable(GL_BLEND);
-            rtint->Unbind();
+                rtint.Clear(0, 0, 0, 0);
+                rtint.Bind();
+                glViewport(0, 0, RENDER_WIDTH, RENDER_HEIGHT);
+                quad.SetImage(textures2[0]);
+                quad.Render();
+                rtint.Unbind();
+                pr.SetVisible2(1, true);
+                pr.SetVisible2(0, false);
+                pr.Render2(false);
+                rtint.Bind();
+                glBlendEquation(GL_FUNC_ADD);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                glEnable(GL_BLEND);
+                dilate.SetImage(textures2[0]);
+                dilate.SetRadius(10);
+                dilate.Render();
+                glDisable(GL_BLEND);
+                rtint.Unbind();
 
 
-            //add above shape to original shadow map with synthetic shadow mask removed
+                //add above shape to original shadow map with synthetic shadow mask removed
 
-            //mask out object's shadow (dilated by some pixels)
-            rtdiff->Clear(0,0,0,0);
-            rtdiff->Bind();
-            glViewport(0,0,RENDER_WIDTH, RENDER_HEIGHT);
-            dilate->SetImage(textures1[0]);
+                //mask out object's shadow (dilated by some pixels)
+                rtdiff.Clear(0, 0, 0, 0);
+                rtdiff.Bind();
+                glViewport(0, 0, RENDER_WIDTH, RENDER_HEIGHT);
+                dilate.SetImage(textures1[0]);
 
-            dilate->SetInvert(true);
-            dilate->SetRadius(5);
-            dilate->Render();
-            dilate->SetInvert(false);
+                dilate.SetInvert(true);
+                dilate.SetRadius(5);
+                dilate.Render();
+                dilate.SetInvert(false);
 
-            //add in real shadow
-            glBlendEquation(GL_FUNC_ADD);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glEnable(GL_BLEND);
-            quad->SetImage(textures1[0]);
-            quad->Render();
+                //add in real shadow
+                glBlendEquation(GL_FUNC_ADD);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                glEnable(GL_BLEND);
+                quad.SetImage(textures1[0]);
+                quad.Render();
 
-            //add in synthetic shadow in masked region
-            quad->SetImage(rtint->GetTextureIDs()[0]);
-            glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
-            quad->Render();
-            rtdiff->Unbind();
-            glDisable(GL_BLEND);
+                //add in synthetic shadow in masked region
+                quad.SetImage(rtint.GetTextureIDs()[0]);
+                glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
+                quad.Render();
+                rtdiff.Unbind();
+                glDisable(GL_BLEND);
 
-            pr->SetVisible2(0, true);
-            pr->Render2(true);
+                pr.SetVisible2(0, true);
+                pr.Render2(true);
 
-            //display processed image as a test
-            glViewport(fwidth/4, fheight/4, fwidth/2 ,fheight/2);
-            quad->SetImage(rtint->GetTextureIDs()[0]);
-            quad->Render();
+                //display processed image as a test
+                glViewport(fwidth / 4, fheight / 4, fwidth / 2, fheight / 2);
+                quad.SetImage(rtint.GetTextureIDs()[0]);
+                quad.Render();
 
 //            //display final render
 //            glViewport(fwidth/4, fheight/4, fwidth/2 ,fheight/2);
-//            quad->SetImage(finalTexture1);
-//            quad->Render();
-        }
+//            quad.SetImage(finalTexture1);
+//            quad.Render();
+            }
 
 
 
-        // Swap buffers
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-        std::this_thread::sleep_for(std::chrono::milliseconds(30));
-    } // Check if the ESC key was pressed or the window was closed
-    while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
-           glfwWindowShouldClose(window) == 0 );
-    //delete test image
+            // Swap buffers
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+            std::this_thread::sleep_for(std::chrono::milliseconds(30));
+        } // Check if the ESC key was pressed or the window was closed
+        while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
+               glfwWindowShouldClose(window) == 0);
+        //delete test image
 //    glBindTexture(GL_TEXTURE_2D, 0);
 //    glDeleteTextures(1, &temp);
 
-
-    delete rtdiff;
-    delete rtint;
-    delete quad;
-    delete dilate;
-    delete light;
-    delete dirLight;
-    delete pr;
-
+    }
     GLuint err;
     while ((err = glGetError()) != GL_NO_ERROR) {
         fprintf(stderr, "error %x\n", err);

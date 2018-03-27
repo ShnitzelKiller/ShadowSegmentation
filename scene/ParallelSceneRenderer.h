@@ -30,12 +30,11 @@ public:
     void GetFinalImages(GLuint *img1, GLuint *img2);
     void ReadImageData1(void *buffer, GLenum format, GLenum type, int index);
     void ReadImageData2(void *buffer, GLenum format, GLenum type, int index);
-    ~ParallelSceneRenderer();
 private:
-    Renderer* r1;
-    Renderer* r2;
-    Scene* s1;
-    Scene* s2;
+    Renderer r1;
+    Renderer r2;
+    Scene s1;
+    Scene s2;
 };
 
 

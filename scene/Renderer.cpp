@@ -7,10 +7,10 @@
 #include "Renderer.h"
 #include <glm/gtx/transform.hpp>
 
-Renderer::Renderer(Scene *scene, int width, int height, GLenum internalformat) : scene(scene), width(width), height(height), internalformat(internalformat), finalBuffer(width, height, 1, internalformat) {
+Renderer::Renderer(Scene &scene, int width, int height, GLenum internalformat) : scene(scene), width(width), height(height), internalformat(internalformat), finalBuffer(width, height, 1, internalformat) {
     quad.Init();
 
-    num_buffers = (int) scene->lights.size();
+    num_buffers = (int) scene.lights.size();
 
     rendertextures = std::vector<RenderTexture>();
     for (int i=0; i<num_buffers; i++) {
@@ -35,16 +35,16 @@ void Renderer::Render(bool shading) {
         glViewport(0, 0, width, height);
 
         if (shading) {
-            ScreenspaceQuad *surface = scene->GetLitSurface(i);
+            ScreenspaceQuad *surface = scene.GetLitSurface(i);
             surface->Render();
         }
 
-        glm::mat4 VP = scene->GetProjectionMatrix(i);
+        glm::mat4 VP = scene.GetProjectionMatrix(i);
 
-        for (auto it = scene->instances.begin(); it != scene->instances.end(); it++) {
+        for (auto it = scene.instances.begin(); it != scene.instances.end(); it++) {
             if (!it->active) continue;
             program->Use();
-            Mesh m = scene->meshes[it->meshID];
+            Mesh m = scene.meshes[it->meshID];
             //std::cout << "drawing instance " << m.name << " (" << m.IndexCount << " indices)" << std::endl;
             glm::mat4 MW;
 
@@ -79,8 +79,6 @@ void Renderer::Render(bool shading) {
     }
 }
 
-Renderer::~Renderer() = default;
-
 std::vector<GLuint> Renderer::GetImages() {
     Update();
     std::vector<GLuint> images;
@@ -93,11 +91,11 @@ std::vector<GLuint> Renderer::GetImages() {
 }
 
 void Renderer::Update() {
-    for (int i=num_buffers; i<scene->lights.size(); i++) {
+    for (int i=num_buffers; i<scene.lights.size(); i++) {
         RenderTexture rt(width, height, 1, internalformat);
         rendertextures.push_back(std::move(rt));
     }
-    num_buffers = (int) scene->lights.size();
+    num_buffers = (int) scene.lights.size();
 }
 
 int Renderer::GetWidth() const {

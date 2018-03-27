@@ -13,7 +13,7 @@
 
 class RenderContext {
 public:
-    explicit RenderContext(Program *p);
+    explicit RenderContext(std::shared_ptr<Program> p);
     GLint SetUniform(std::string const &name, float val);
     GLint SetUniform(std::string const &name, glm::mat4x4 val);
     GLint SetUniform(std::string const &name, glm::mat3x3 val);
@@ -24,7 +24,7 @@ public:
 
     void Render(GLuint vao, GLuint indexCount);
 private:
-    Program *p;
+    std::shared_ptr<Program> p;
     std::map<GLint, float> floatMapping;
     std::map<GLint, glm::mat4x4> mat4Mapping;
     std::map<GLint, glm::mat3x3> mat3Mapping;

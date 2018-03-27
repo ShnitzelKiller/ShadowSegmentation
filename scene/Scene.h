@@ -92,6 +92,8 @@ public:
 private:
     float xmin, ymin, xmax, ymax;
     friend class Light;
+    Scene(Scene const &other); //disallow copying
+    Scene& operator=(Scene const &other);
 };
 
 #endif //RENDERER_SCENE_H
