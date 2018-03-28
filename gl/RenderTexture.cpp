@@ -42,6 +42,7 @@ RenderTexture::RenderTexture(RenderTexture &&other) noexcept : tex(other.tex), f
     other.tex = nullptr;
     other.fbo = 0;
     other.zbuf = 0;
+    other.count = 0;
 }
 
 RenderTexture::~RenderTexture() {

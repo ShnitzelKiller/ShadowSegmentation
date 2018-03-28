@@ -102,7 +102,6 @@ int main(int argc, char** argv) {
 
         RenderTexture rtdiff(RENDER_WIDTH, RENDER_HEIGHT, 1, GL_RGBA);
         RenderTexture rtint(RENDER_WIDTH, RENDER_HEIGHT, 1, GL_RGBA);
-
         do {
 
             //run renderer
@@ -198,7 +197,7 @@ int main(int argc, char** argv) {
 
                 //display processed image as a test
                 glViewport(fwidth / 4, fheight / 4, fwidth / 2, fheight / 2);
-                quad.SetImage(rtint.GetTextureIDs()[0]);
+                quad.SetImage(rtdiff.GetTextureIDs()[0]);
                 quad.Render();
 
 //            //display final render

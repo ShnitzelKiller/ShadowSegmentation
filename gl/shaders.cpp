@@ -127,9 +127,9 @@ Program::Program() : vshader_(0), fshader_(0) {
     program_ = glCreateProgram();
 }
 
-void Program::AttachVertexShader(const char *vert) {
+void Program::AttachVertexShader(const char *vertexShader) {
     GLuint newvert = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(newvert, 1, &vert, nullptr);
+    glShaderSource(newvert, 1, &vertexShader, nullptr);
     glCompileShader(newvert);
     GLint status;
     glGetShaderiv(newvert, GL_COMPILE_STATUS, &status);
@@ -143,10 +143,10 @@ void Program::AttachVertexShader(const char *vert) {
     vshader_ = newvert;
 }
 
-void Program::AttachFragmentShader(const char *frag) {
+void Program::AttachFragmentShader(const char *fragShader) {
     GLint status;
     GLuint newfrag = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(newfrag, 1, &frag, nullptr);
+    glShaderSource(newfrag, 1, &fragShader, nullptr);
     glCompileShader(newfrag);
     glGetShaderiv(newfrag, GL_COMPILE_STATUS, &status);
     if (status != GL_TRUE) {
@@ -159,10 +159,10 @@ void Program::AttachFragmentShader(const char *frag) {
     fshader_ = newfrag;
 }
 
-void Program::AttachShaders(const char *vert, const char *frag) {
+void Program::AttachShaders(const char *vertexShader, const char *fragShader) {
 
-    AttachVertexShader(vert);
-    AttachFragmentShader(frag);
+    AttachVertexShader(vertexShader);
+    AttachFragmentShader(fragShader);
 }
 
 void Program::Link() {

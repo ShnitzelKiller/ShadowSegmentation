@@ -5,7 +5,7 @@
 #include "ParallelSceneRenderer.h"
 
 ParallelSceneRenderer::ParallelSceneRenderer(float xmin, float ymin, float xmax, float ymax, int width, int height, GLenum internalformat) :
-        s1(xmin, ymin, xmax, ymax), s2(xmin, ymin, xmax, ymax), r1(s1, width, height, internalformat), r2(s1, width, height, internalformat) {}
+        s1(xmin, ymin, xmax, ymax), s2(xmin, ymin, xmax, ymax), r1(s1, width, height, internalformat), r2(s2, width, height, internalformat) {}
 
 
 size_t ParallelSceneRenderer::LoadMesh(const std::string name1, const std::string name2) {
